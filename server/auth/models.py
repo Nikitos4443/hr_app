@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class User(BaseModel):
-    id: str | None = None
+    id: int | None = None
     username: str
     password: str  # тут уже хеш
     role: str = "user"

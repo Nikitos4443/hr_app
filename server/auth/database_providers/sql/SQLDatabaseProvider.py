@@ -3,6 +3,7 @@ from ..IDatabaseProvider import IDatabaseProvider
 from ...models import User
 from .database import Base, engine, session_local
 from .user_model import UserTable
+from sqlalchemy import select
 
 Base.metadata.create_all(bind=engine)
 
@@ -20,6 +21,14 @@ class SQLDatabaseProvider(IDatabaseProvider):
         )
         self.db.add(user)
         self.db.commit()
+
+    def query_user(self, username):
+        stmt = select(UserTable).where(UserTable.username == username)
+        userEntity = self.db.scalars(stmt).first()
+        if not userEntity:
+            return
+        user = User(id=userEntity.id, username=userEntity.username, password=userEntity.password, role=userEntity.role)
+        return user
 
 
 def get_sql_provider():
