@@ -52,7 +52,7 @@ def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 def authenticate_user(username: str, password: str, db: provider_dependency):
-    user : User = db.query_user(username)
+    user : User = db.query_user(username.lower())
     if not user:
         return False
     if not bcrypt.checkpw(password.encode(), user.password.encode()):

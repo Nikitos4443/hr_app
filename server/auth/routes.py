@@ -12,9 +12,10 @@ router = APIRouter(
     tags=['auth']
 )
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=Token)
 async def create_user(db: provider_dependency, create_user_req: CreateUserRequest):
     register_user(db, create_user_req)
+    return login(db, create_user_req.username, create_user_req.password)
 
 
 @router.post("/token", response_model=Token)
