@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib/core';
 import { VideoPipelineStack } from '../lib/video-pipeline-stack';
+import { CVPipelineStack } from '../lib/cv-stack';
 import {S3StorageStack} from "../lib/s3-storage-stack";
 import {BUCKET_RAW_NAME} from "../constants";
 import * as dotenv from 'dotenv';
@@ -21,3 +22,8 @@ new VideoPipelineStack(app, 'VideoPipelineStack', {
   bucketName: fullBucketName,
   env,
 });
+
+new CVPipelineStack(app, 'CVPipelineStack', {
+  bucketName: fullBucketName,
+  env
+})
