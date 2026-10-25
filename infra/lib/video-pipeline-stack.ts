@@ -33,13 +33,9 @@ export class VideoPipelineStack extends cdk.Stack {
 
     const fn = new lambda.Function(this, 'VideoPipelineLambda', {
       runtime: lambda.Runtime.PYTHON_3_14,
-      handler: 'index.index',
+      handler: 'app.index',
       timeout: lambdaTimeout,
-      code: lambda.Code.fromInline(`
-def index(event, context):
-    print("Received EventBridge Event:", event)
-    return {'statusCode': 200}
-      `),
+      code: lambda.Code.fromAsset(__dirname + '../../video_process_lambda'),
       layers: [ffmpegLayer]
     });
 
