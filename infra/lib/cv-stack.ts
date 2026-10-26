@@ -8,7 +8,7 @@ import {SqsEventSource} from "aws-cdk-lib/aws-lambda-event-sources";
 import {Duration} from "aws-cdk-lib";
 import { BUCKET_CV_PREFIX } from '../constants'
 import {IBucketNameProps} from "../interfaces";
-
+import  * as path from 'path';
 export class CVPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: IBucketNameProps) {
     super(scope, id, props);
@@ -31,7 +31,12 @@ export class CVPipelineStack extends cdk.Stack {
       runtime: lambda.Runtime.PYTHON_3_14,
       handler: 'app.index',
       timeout: lambdaTimeout,
-      code: lambda.Code.fromAsset(__dirname + "../../resume_process_lambda")
+      code: lambda.Code.fromAsset( path.join (__dirname, "../../resume_process_lambda"), 
+        {bundling: {
+          image: lambda.Runtime.PYTHON_3_14.bundlingImage,
+          command: ['bash', '-c', 'pip install -r requirements.txt -t /asset-output && cp -au . /asset-output']
+        }
+      })
     });
 
     bucket.grantRead(fn);
