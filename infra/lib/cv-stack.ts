@@ -9,6 +9,9 @@ import {Duration} from "aws-cdk-lib";
 import { BUCKET_CV_PREFIX } from '../constants'
 import {IBucketNameProps} from "../interfaces";
 import  * as path from 'path';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+
 export class CVPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: IBucketNameProps) {
     super(scope, id, props);
@@ -36,7 +39,13 @@ export class CVPipelineStack extends cdk.Stack {
           image: lambda.Runtime.PYTHON_3_14.bundlingImage,
           command: ['bash', '-c', 'pip install -r requirements.txt -t /asset-output && cp -au . /asset-output']
         }
-      })
+      }),
+      environment: {
+        MONGO_URI: process.env.MONGO_URI!,
+        MONGO_DB_NAME: process.env.MONGO_DB_NAME!,
+        GOOGLE_API_KEY: process.env.GOOGLE_API_KEY!
+
+      }
     });
 
     bucket.grantRead(fn);
