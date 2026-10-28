@@ -40,6 +40,7 @@ jobs:
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: eu-central-1
+          DEPLOY_STACKS: AnalyzerLambdaStack
         run: |
           cd infra
           npx cdk deploy AnalyzerLambdaStack --require-approval never
