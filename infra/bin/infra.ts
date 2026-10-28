@@ -18,24 +18,43 @@ const env = {
 
 const fullBucketName = BUCKET_RAW_NAME + `-${env.account}-${env.region}`
 
-new S3StorageStack(app, 'S3StorageStack', {env});
+const stacks: Record<string, () => cdk.Stack> = {
+  S3StorageStack: () => new S3StorageStack(app, 'S3StorageStack', {env}),
 
-// new MainServerStack(app, 'MainServerStack', {
-//   bucketName: fullBucketName,
-//   env,
-// });
+  // MainServerStack: () => new MainServerStack(app, 'MainServerStack', {
+  //   bucketName: fullBucketName,
+  //   env,
+  // }),
 
-new VideoPipelineStack(app, 'VideoPipelineStack', {
-  bucketName: fullBucketName,
-  env,
-});
+  VideoPipelineStack: () => new VideoPipelineStack(app, 'VideoPipelineStack', {
+    bucketName: fullBucketName,
+    env,
+  }),
 
-new CVPipelineStack(app, 'CVPipelineStack', {
-  bucketName: fullBucketName,
-  env
-})
+  CVPipelineStack: () => new CVPipelineStack(app, 'CVPipelineStack', {
+    bucketName: fullBucketName,
+    env
+  }),
 
-new AnalyzerLambdaStack(app, 'AnalyzerLambdaStack', {
-  bucketName: fullBucketName,
-  env
-})
+  AnalyzerLambdaStack: () => new AnalyzerLambdaStack(app, 'AnalyzerLambdaStack', {
+    bucketName: fullBucketName,
+    env
+  }),
+};
+
+// DEPLOY_STACKS is a comma-separated list of stack keys to instantiate (e.g. "VideoPipelineStack").
+// When unset, every stack is created.
+const requested = process.env.DEPLOY_STACKS
+  ?.split(',')
+  .map((key) => key.trim())
+  .filter(Boolean);
+
+const selected = requested?.length ? requested : Object.keys(stacks);
+
+for (const key of selected) {
+  const createStack = stacks[key];
+  if (!createStack) {
+    throw new Error(`Unknown stack "${key}" in DEPLOY_STACKS. Available: ${Object.keys(stacks).join(', ')}`);
+  }
+  createStack();
+}
