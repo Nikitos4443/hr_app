@@ -20,10 +20,10 @@ const fullBucketName = BUCKET_RAW_NAME + `-${env.account}-${env.region}`
 
 new S3StorageStack(app, 'S3StorageStack', {env});
 
-new MainServerStack(app, 'MainServerStack', {
-  bucketName: fullBucketName,
-  env,
-});
+// new MainServerStack(app, 'MainServerStack', {
+//   bucketName: fullBucketName,
+//   env,
+// });
 
 new VideoPipelineStack(app, 'VideoPipelineStack', {
   bucketName: fullBucketName,

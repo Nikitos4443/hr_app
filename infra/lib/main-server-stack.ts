@@ -16,7 +16,7 @@ export class MainServerStack extends cdk.Stack {
       cluster,
       cpu: 256,
       memoryLimitMiB: 512,
-      desiredCount: 0,
+      desiredCount: 1,
       publicLoadBalancer: true,
       taskImageOptions: {
         image: ecs.ContainerImage.fromAsset(path.join(__dirname, '../../server')),
