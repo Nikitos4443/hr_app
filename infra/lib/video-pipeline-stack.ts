@@ -1,3 +1,5 @@
+import * as path from 'path';
+import { execSync } from 'child_process';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -8,6 +10,8 @@ import {SqsEventSource} from "aws-cdk-lib/aws-lambda-event-sources";
 import {Duration} from "aws-cdk-lib";
 import { BUCKET_RAW_VIDEOS_PREFIX } from '../constants'
 import {IBucketNameProps} from "../interfaces";
+
+const FFMPEG_URL = 'https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz';
 
 export class VideoPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: IBucketNameProps) {
@@ -25,8 +29,25 @@ export class VideoPipelineStack extends cdk.Stack {
       visibilityTimeout: Duration.seconds(lambdaTimeout.toSeconds() * 2),
     });
 
+    // FFmpeg is downloaded during bundling, which CDK runs only for stacks being deployed,
+    // so synthesizing other stacks (e.g. in their own CI) doesn't need the binary.
     const ffmpegLayer = new lambda.LayerVersion(this, 'FFmpegLayer', {
-      code: lambda.Code.fromAsset('layers/ffmpeg/ffmpeg.zip'),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../layers/ffmpeg'), {
+        exclude: ['bin', '*.zip'],
+        assetHashType: cdk.AssetHashType.SOURCE,
+        bundling: {
+          image: cdk.DockerImage.fromRegistry('alpine'),
+          local: {
+            tryBundle(outputDir: string) {
+              execSync(
+                `mkdir -p ${outputDir}/bin && wget -qO- ${FFMPEG_URL} | tar -xJ --strip-components=1 -C ${outputDir}/bin`,
+                { stdio: 'inherit' },
+              );
+              return true;
+            },
+          },
+        },
+      }),
       compatibleRuntimes: [lambda.Runtime.PYTHON_3_14],
       description: 'Custom FFmpeg layer',
     });
@@ -35,7 +56,7 @@ export class VideoPipelineStack extends cdk.Stack {
       runtime: lambda.Runtime.PYTHON_3_14,
       handler: 'app.index',
       timeout: lambdaTimeout,
-      code: lambda.Code.fromAsset(__dirname + '../../video_process_lambda'),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../video_process_lambda')),
       layers: [ffmpegLayer]
     });
 
