@@ -1,3 +1,11 @@
+import os
+
+# Set before importing the app: auth.auth reads SECRET_KEY at import time,
+# and CI has no .env file.
+os.environ["SECRET_KEY"] = "test-secret-key-at-least-32-bytes-long"
+os.environ["ALGORITHM"] = "HS256"
+os.environ["SQLALCHEMY_DATABASE_URL"] = "sqlite://"
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
