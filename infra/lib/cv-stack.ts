@@ -1,3 +1,4 @@
+import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -27,8 +28,6 @@ export class CVPipelineStack extends cdk.Stack {
     const queue = new sqs.Queue(this, 'CVPipelineQueue', {
       visibilityTimeout: Duration.seconds(lambdaTimeout.toSeconds() * 2),
     });
-
-
 
     const fn = new lambda.Function(this, 'CVPipelineLambda', {
       runtime: lambda.Runtime.PYTHON_3_14,

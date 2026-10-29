@@ -1,3 +1,4 @@
+import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -6,7 +7,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import {SqsEventSource} from "aws-cdk-lib/aws-lambda-event-sources";
 import {Duration} from "aws-cdk-lib";
-import { BUCKET_RAW_VIDEOS_PREFIX } from '../constants'
+import { BUCKET_RAW_VIDEOS_PREFIX, BUCKET_FFMPEG_LAYER_KEY } from '../constants'
 import {IBucketNameProps} from "../interfaces";
 
 export class VideoPipelineStack extends cdk.Stack {
@@ -26,20 +27,16 @@ export class VideoPipelineStack extends cdk.Stack {
     });
 
     const ffmpegLayer = new lambda.LayerVersion(this, 'FFmpegLayer', {
-      code: lambda.Code.fromAsset('layers/ffmpeg/ffmpeg.zip'),
+      code: lambda.Code.fromBucket(bucket, BUCKET_FFMPEG_LAYER_KEY),
       compatibleRuntimes: [lambda.Runtime.PYTHON_3_14],
       description: 'Custom FFmpeg layer',
     });
 
     const fn = new lambda.Function(this, 'VideoPipelineLambda', {
       runtime: lambda.Runtime.PYTHON_3_14,
-      handler: 'index.index',
+      handler: 'app.index',
       timeout: lambdaTimeout,
-      code: lambda.Code.fromInline(`
-def index(event, context):
-    print("Received EventBridge Event:", event)
-    return {'statusCode': 200}
-      `),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../video_process_lambda')),
       layers: [ffmpegLayer]
     });
 
