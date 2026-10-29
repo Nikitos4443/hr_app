@@ -3,13 +3,14 @@ import os
 import time
 
 from bson import ObjectId
-from bson.errors import InvalidId
 from dotenv import load_dotenv
 from pymongo import MongoClient
 
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s"
+)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -35,7 +36,11 @@ def get_vacancy(id: str):
 
     start = time.perf_counter()
     vacancy = db["vacancies"].find_one(query)
-    logger.info("find_one vacancies took %.3fs, found=%s", time.perf_counter() - start, vacancy is not None)
+    logger.info(
+        "find_one vacancies took %.3fs, found=%s",
+        time.perf_counter() - start,
+        vacancy is not None,
+    )
 
     if vacancy is None:
         return None

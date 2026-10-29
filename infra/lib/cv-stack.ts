@@ -9,6 +9,7 @@ import {SqsEventSource} from "aws-cdk-lib/aws-lambda-event-sources";
 import {Duration} from "aws-cdk-lib";
 import { BUCKET_CV_PREFIX } from '../constants'
 import {IBucketNameProps} from "../interfaces";
+import { pythonLambdaCode } from "./python-lambda-code";
 import * as dotenv from 'dotenv';
 import * as ssm from 'aws-cdk-lib/aws-ssm'
 
@@ -49,12 +50,7 @@ export class CVPipelineStack extends cdk.Stack {
       runtime: lambda.Runtime.PYTHON_3_14,
       handler: 'app.index',
       timeout: lambdaTimeout,
-      code: lambda.Code.fromAsset( path.join (__dirname, "../../resume_process_lambda"),
-        {bundling: {
-          image: lambda.Runtime.PYTHON_3_14.bundlingImage,
-          command: ['bash', '-c', 'pip install -r requirements.txt -t /asset-output && cp -au . /asset-output']
-        }
-      })
+      code: pythonLambdaCode('resume_process_lambda', 'resume-process-lambda'),
     });
 
     bucket.grantRead(fn);

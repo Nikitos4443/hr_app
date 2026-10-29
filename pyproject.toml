@@ -39,7 +39,15 @@ select = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["auth", "config", "logger", "app"]
+known-first-party = [
+    "auth",
+    "config",
+    "logger",
+    "app",
+    "database",
+    "output_model",
+    "process_cv",
+]
 
 [tool.ruff.format]
 quote-style = "double"
