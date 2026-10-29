@@ -1,6 +1,8 @@
 import jwt
 from starlette import status
+
 from auth.auth import ALGORITHM, SECRET_KEY
+
 
 def register(client, username="john", password="secret123", confirm=None):
     return client.post(
