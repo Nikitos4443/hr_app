@@ -1,9 +1,10 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
-from ..IDatabaseProvider import IDatabaseProvider
+
 from ...models import User
+from ..IDatabaseProvider import IDatabaseProvider
 from .database import Base, engine, session_local
 from .user_model import UserTable
-from sqlalchemy import select
 
 Base.metadata.create_all(bind=engine)
 
@@ -15,9 +16,7 @@ class SQLDatabaseProvider(IDatabaseProvider):
 
     def create_user(self, entity: User):
         user = UserTable(
-            username=entity.username,
-            password=entity.password,
-            role=entity.role
+            username=entity.username, password=entity.password, role=entity.role
         )
         self.db.add(user)
         self.db.commit()
@@ -27,7 +26,12 @@ class SQLDatabaseProvider(IDatabaseProvider):
         userEntity = self.db.scalars(stmt).first()
         if not userEntity:
             return
-        user = User(id=userEntity.id, username=userEntity.username, password=userEntity.password, role=userEntity.role)
+        user = User(
+            id=userEntity.id,
+            username=userEntity.username,
+            password=userEntity.password,
+            role=userEntity.role,
+        )
         return user
 
 

@@ -6,12 +6,19 @@ on:
     paths:
       - 'analyzer_lambda/**'
       - 'infra/lib/analyzer-lambda-stack.ts'
+      - 'uv.lock'
+      - 'pyproject.toml'
+      - 'infra/lib/python-lambda-code.ts'
     branches:
       - dev
   workflow_dispatch:
 
 jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml
+
   deploy:
+    needs: checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

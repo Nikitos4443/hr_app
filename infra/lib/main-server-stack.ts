@@ -19,7 +19,7 @@ export class MainServerStack extends cdk.Stack {
       desiredCount: 1,
       publicLoadBalancer: true,
       taskImageOptions: {
-        image: ecs.ContainerImage.fromAsset(path.join(__dirname, '../../server')),
+        image: ecs.ContainerImage.fromAsset(path.join(__dirname, '../..'), { file: 'server/Dockerfile' }),
         containerPort: 8000,
         logDriver: ecs.LogDrivers.awsLogs({ streamPrefix: 'HrMainServer' }),
       },

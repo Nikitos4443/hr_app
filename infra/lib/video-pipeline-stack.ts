@@ -1,4 +1,3 @@
-import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -9,6 +8,7 @@ import {SqsEventSource} from "aws-cdk-lib/aws-lambda-event-sources";
 import {Duration} from "aws-cdk-lib";
 import { BUCKET_RAW_VIDEOS_PREFIX, BUCKET_FFMPEG_LAYER_KEY } from '../constants'
 import {IBucketNameProps} from "../interfaces";
+import { pythonLambdaCode } from "./python-lambda-code";
 
 export class VideoPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: IBucketNameProps) {
@@ -36,7 +36,7 @@ export class VideoPipelineStack extends cdk.Stack {
       runtime: lambda.Runtime.PYTHON_3_14,
       handler: 'app.index',
       timeout: lambdaTimeout,
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../video_process_lambda')),
+      code: pythonLambdaCode('video_process_lambda', 'video-process-lambda'),
       layers: [ffmpegLayer]
     });
 
