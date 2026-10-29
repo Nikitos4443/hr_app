@@ -9,7 +9,6 @@ import {SqsEventSource} from "aws-cdk-lib/aws-lambda-event-sources";
 import {Duration} from "aws-cdk-lib";
 import { BUCKET_CV_PREFIX } from '../constants'
 import {IBucketNameProps} from "../interfaces";
-import  * as path from 'path';
 import * as dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
