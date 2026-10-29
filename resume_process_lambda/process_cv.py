@@ -34,9 +34,10 @@ def get_job(id: str) -> dict:
 
 
 def process_cv(path, id):
+    print(f"Path: {path}, id: {id}")
     load_dotenv()
     docs = PyPDFLoader(path, mode="single").load()
-
+    print("Creating agent")
     agent = create_agent(
         model="google_genai:gemini-3.5-flash-lite",
         tools=[get_job],
@@ -45,7 +46,9 @@ def process_cv(path, id):
         middleware=[ToolCallLimitMiddleware(tool_name="get_vacancy", run_limit=1)],
     )
 
+    print("Invoking agent")
     start = time.perf_counter()
+
     response = agent.invoke(
         {'messages': [{'role': 'user', 'content': docs[0].page_content}]}
     )

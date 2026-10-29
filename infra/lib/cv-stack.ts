@@ -10,6 +10,8 @@ import {Duration} from "aws-cdk-lib";
 import { BUCKET_CV_PREFIX } from '../constants'
 import {IBucketNameProps} from "../interfaces";
 import * as dotenv from 'dotenv';
+import * as ssm from 'aws-cdk-lib/aws-ssm'
+
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 export class CVPipelineStack extends cdk.Stack {
@@ -24,6 +26,21 @@ export class CVPipelineStack extends cdk.Stack {
       bucketName,
     });
 
+    const  mongoUriParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'MySecrets', {
+      parameterName: 'MONGO_URI',
+      version: 1
+    })
+
+    const  mongoNameParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'MySecrets', {
+      parameterName: 'MONGO_DB_NAME',
+      version: 1
+    })
+
+    const  geminiKeyParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'MySecrets', {
+      parameterName: 'GOOGLE_API_KEY',
+      version: 1
+    })
+
     const queue = new sqs.Queue(this, 'CVPipelineQueue', {
       visibilityTimeout: Duration.seconds(lambdaTimeout.toSeconds() * 2),
     });
@@ -37,13 +54,7 @@ export class CVPipelineStack extends cdk.Stack {
           image: lambda.Runtime.PYTHON_3_14.bundlingImage,
           command: ['bash', '-c', 'pip install -r requirements.txt -t /asset-output && cp -au . /asset-output']
         }
-      }),
-      environment: {
-        MONGO_URI: process.env.MONGO_URI!,
-        MONGO_DB_NAME: process.env.MONGO_DB_NAME!,
-        GOOGLE_API_KEY: process.env.GOOGLE_API_KEY!
-
-      }
+      })
     });
 
     bucket.grantRead(fn);
@@ -52,6 +63,10 @@ export class CVPipelineStack extends cdk.Stack {
         new s3n.SqsDestination(queue),
         { prefix: BUCKET_CV_PREFIX }
     );
+    mongoUriParameter.grantRead(fn);
+    mongoNameParameter.grantRead(fn);
+    geminiKeyParameter.grantRead(fn);
+    
     const eventSource = new SqsEventSource(queue);
     fn.addEventSource(eventSource);
   }
