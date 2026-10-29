@@ -4,7 +4,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 
 export const REPO_ROOT = path.join(__dirname, '../..');
 
-const UV_BUNDLING_IMAGE = DockerImage.fromRegistry('ghcr.io/astral-sh/uv:0.13.6-python3.14-bookworm-slim');
+const UV_BUNDLING_IMAGE = DockerImage.fromRegistry('ghcr.io/astral-sh/uv:0.13.6-python3.14-trixie-slim');
 
 // Packages a uv workspace member as Lambda code. The asset is the repo root (restricted to the
 // workspace manifests, uv.lock and the member's own folder) so dependencies resolve from uv.lock.
