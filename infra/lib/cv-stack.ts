@@ -1,3 +1,4 @@
+import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -8,7 +9,8 @@ import {SqsEventSource} from "aws-cdk-lib/aws-lambda-event-sources";
 import {Duration} from "aws-cdk-lib";
 import { BUCKET_CV_PREFIX } from '../constants'
 import {IBucketNameProps} from "../interfaces";
-import { pythonLambdaCode } from "./python-lambda-code";
+import * as dotenv from 'dotenv';
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 export class CVPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: IBucketNameProps) {
@@ -30,7 +32,18 @@ export class CVPipelineStack extends cdk.Stack {
       runtime: lambda.Runtime.PYTHON_3_14,
       handler: 'app.index',
       timeout: lambdaTimeout,
-      code: pythonLambdaCode('resume_process_lambda', 'resume-process-lambda')
+      code: lambda.Code.fromAsset( path.join (__dirname, "../../resume_process_lambda"),
+        {bundling: {
+          image: lambda.Runtime.PYTHON_3_14.bundlingImage,
+          command: ['bash', '-c', 'pip install -r requirements.txt -t /asset-output && cp -au . /asset-output']
+        }
+      }),
+      environment: {
+        MONGO_URI: process.env.MONGO_URI!,
+        MONGO_DB_NAME: process.env.MONGO_DB_NAME!,
+        GOOGLE_API_KEY: process.env.GOOGLE_API_KEY!
+
+      }
     });
 
     bucket.grantRead(fn);
