@@ -75,3 +75,4 @@ venv.bak/
 *.log
 *.sqlite3
 *.db
+*.pdf

@@ -1,0 +1,7 @@
+langchain==1.4.7
+langchain-community==0.4.2
+langchain-google-genai==4.4.2
+pypdf==6.21.2
+pydantic==2.14.1
+pymongo==4.19.0
+python-dotenv==1.2.4
