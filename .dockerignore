@@ -1,0 +1,10 @@
+*
+!pyproject.toml
+!uv.lock
+!*/pyproject.toml
+!server
+**/__pycache__
+**/.venv
+**/.ruff_cache
+**/*.db
+server/tests

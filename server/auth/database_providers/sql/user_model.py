@@ -1,5 +1,6 @@
 # auth/database_providers/sql/user_model.py
 from sqlalchemy import Column, Integer, String
+
 from .database import Base
 
 

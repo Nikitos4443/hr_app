@@ -1,16 +1,15 @@
 from typing import Annotated
+
 from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
-from fastapi.security import OAuth2PasswordRequestForm
+from auth.auth import login, provider_dependency, register_user
 from auth.dto.create_user_request import CreateUserRequest
 from auth.dto.token import Token
-from auth.auth import provider_dependency, register_user, login
 
-router = APIRouter(
-    prefix='/auth',
-    tags=['auth']
-)
+router = APIRouter(prefix="/auth", tags=["auth"])
+
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=Token)
 async def create_user(db: provider_dependency, create_user_req: CreateUserRequest):
@@ -19,5 +18,7 @@ async def create_user(db: provider_dependency, create_user_req: CreateUserReques
 
 
 @router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: provider_dependency):
+async def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: provider_dependency
+):
     return login(db, form_data.username, form_data.password)

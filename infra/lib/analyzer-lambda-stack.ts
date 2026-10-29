@@ -1,10 +1,10 @@
-import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import {Duration} from "aws-cdk-lib";
 import {IBucketNameProps} from "../interfaces";
+import { pythonLambdaCode } from "./python-lambda-code";
 
 export class AnalyzerLambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: IBucketNameProps) {
@@ -16,12 +16,7 @@ export class AnalyzerLambdaStack extends cdk.Stack {
       runtime: lambda.Runtime.PYTHON_3_14,
       handler: 'app.index',
       timeout: lambdaTimeout,
-      code: lambda.Code.fromAsset(path.join(__dirname, "../../analyzer_lambda"), {
-          bundling: {
-              image: lambda.Runtime.PYTHON_3_14.bundlingImage,
-              command: ['bash', '-c', 'pip install -r requirements.txt -t /asset-output && cp -au . /asset-output']
-          }
-      }),
+      code: pythonLambdaCode('analyzer_lambda', 'analyzer-lambda'),
     });
 
     const schedulerRole = new iam.Role(this, 'EventBridgeSchedulerRole', {

@@ -1,0 +1,45 @@
+[project]
+name = "hr-app"
+version = "0.1.0"
+description = "HR App monorepo"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "ruff>=0.17.3",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = [
+    "server",
+    "analyzer_lambda",
+    "resume_process_lambda",
+    "video_process_lambda",
+]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+extend-exclude = ["infra", "client"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["auth", "config", "logger", "app"]
+
+[tool.ruff.format]
+quote-style = "double"
