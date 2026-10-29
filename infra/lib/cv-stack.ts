@@ -27,17 +27,17 @@ export class CVPipelineStack extends cdk.Stack {
       bucketName,
     });
 
-    const  mongoUriParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'MySecrets', {
+    const  mongoUriParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'MySecretMongoUri', {
       parameterName: 'MONGO_URI',
       version: 1
     })
 
-    const  mongoNameParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'MySecrets', {
+    const  mongoNameParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'MySecretMongoName', {
       parameterName: 'MONGO_DB_NAME',
       version: 1
     })
 
-    const  geminiKeyParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'MySecrets', {
+    const  geminiKeyParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'MySecretLLMAPI', {
       parameterName: 'GOOGLE_API_KEY',
       version: 1
     })
@@ -62,7 +62,7 @@ export class CVPipelineStack extends cdk.Stack {
     mongoUriParameter.grantRead(fn);
     mongoNameParameter.grantRead(fn);
     geminiKeyParameter.grantRead(fn);
-    
+
     const eventSource = new SqsEventSource(queue);
     fn.addEventSource(eventSource);
   }
