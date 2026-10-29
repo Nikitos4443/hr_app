@@ -2,8 +2,6 @@ import logging
 import time
 
 from bson import ObjectId
-from dotenv import load_dotenv
-from bson.errors import InvalidId
 from pymongo import MongoClient
 
 from config import settings
