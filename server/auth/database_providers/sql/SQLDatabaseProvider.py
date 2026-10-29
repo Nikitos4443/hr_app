@@ -15,9 +15,7 @@ class SQLDatabaseProvider(IDatabaseProvider):
         self.db = db
 
     def create_user(self, entity: User):
-        user = UserTable(
-            username=entity.username, password=entity.password, role=entity.role
-        )
+        user = UserTable(username=entity.username, password=entity.password, role=entity.role)
         self.db.add(user)
         self.db.commit()
 

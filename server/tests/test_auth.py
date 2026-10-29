@@ -40,9 +40,7 @@ def test_register_rejects_short_username(client):
 def test_login_with_valid_credentials(client):
     register(client)
 
-    response = client.post(
-        "/auth/token", data={"username": "john", "password": "secret123"}
-    )
+    response = client.post("/auth/token", data={"username": "john", "password": "secret123"})
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["access_token"]

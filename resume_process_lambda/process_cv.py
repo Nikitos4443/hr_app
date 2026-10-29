@@ -2,12 +2,12 @@ import logging
 import time
 
 from langchain.agents import create_agent
-from langchain.chat_models import init_chat_model
 from langchain.agents.middleware import ToolCallLimitMiddleware
+from langchain.chat_models import init_chat_model
 from langchain.tools import tool
-from config import settings
 from langchain_community.document_loaders import PyPDFLoader
 
+from config import settings
 from database import get_vacancy
 from output_model import OutputModel
 
@@ -29,10 +29,7 @@ Scoring rules:
 
 @tool(
     "get_vacancy",
-    description=(
-        "Get full vacancy data from mongo by id. "
-        "The result is complete, call only once."
-    ),
+    description=("Get full vacancy data from mongo by id. The result is complete, call only once."),
 )
 def get_job(id: str) -> dict:
     vacancy = get_vacancy(id)
@@ -46,7 +43,9 @@ def process_cv(path, id):
     docs = PyPDFLoader(path, mode="single").load()
     print("Creating agent")
     agent = create_agent(
-        model=init_chat_model("google_genai:gemini-3.5-flash-lite", google_api_key=settings.google_api_key),
+        model=init_chat_model(
+            "google_genai:gemini-3.5-flash-lite", google_api_key=settings.google_api_key
+        ),
         tools=[get_job],
         system_prompt=SYSTEM_PROMPT.format(vacancy_id=id),
         response_format=OutputModel,
@@ -56,8 +55,6 @@ def process_cv(path, id):
     print("Invoking agent")
     start = time.perf_counter()
 
-    response = agent.invoke(
-        {"messages": [{"role": "user", "content": docs[0].page_content}]}
-    )
+    response = agent.invoke({"messages": [{"role": "user", "content": docs[0].page_content}]})
     logger.info("agent.invoke took %.3fs", time.perf_counter() - start)
     return response["structured_response"]
