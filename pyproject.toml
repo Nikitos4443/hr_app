@@ -24,7 +24,7 @@ members = [
 
 [tool.ruff]
 target-version = "py314"
-line-length = 88
+line-length = 100
 extend-exclude = ["infra", "client"]
 
 [tool.ruff.lint]
