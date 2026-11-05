@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 
-from ..models import User
+from database.models.user_model import User
 
-
-class IDatabaseProvider(ABC):
+class IUsersRepository(ABC):
     @abstractmethod
     def create_user(self, entity: User): ...
 

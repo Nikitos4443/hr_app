@@ -1,10 +1,7 @@
-# auth/database_providers/sql/user_model.py
 from sqlalchemy import Column, Integer, String
+from database.sql.connection import Base
 
-from .database import Base
-
-
-class UserTable(Base):
+class Users(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)

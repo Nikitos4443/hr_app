@@ -1,6 +1,5 @@
 from pydantic import BaseModel, field_validator
 
-
 class User(BaseModel):
     id: int | None = None
     username: str
