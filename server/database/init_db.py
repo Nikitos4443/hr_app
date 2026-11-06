@@ -10,6 +10,7 @@ def init_db():
         from sqlalchemy import create_engine
         from sqlalchemy.orm import sessionmaker
         from database.sql.connection import Base
+        import database.sql.tables  # noqa: F401  registers all tables in Base.metadata
 
         engine = create_engine(SQLALCHEMY_DATABASE_URL)
         SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
