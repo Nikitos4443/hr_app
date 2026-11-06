@@ -5,6 +5,8 @@ on:
   push:
     paths:
       - 'video_process_lambda/**'
+      - 'shared/**'
+      - '.dockerignore'
       - 'infra/lib/video-pipeline-stack.ts'
       - 'uv.lock'
       - 'pyproject.toml'

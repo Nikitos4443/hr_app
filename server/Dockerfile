@@ -8,7 +8,7 @@ RUN python3 -m venv /venv
 ENV UV_LINK_MODE=copy UV_COMPILE_BYTECODE=1
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,target=/src \
-    uv export --frozen --no-dev --no-emit-workspace --package server -o /tmp/requirements.txt && \
+    uv export --frozen --no-dev --no-editable --package server -o /tmp/requirements.txt && \
     uv pip install --python /venv/bin/python -r /tmp/requirements.txt
 
 FROM dhi.io/python:3.14

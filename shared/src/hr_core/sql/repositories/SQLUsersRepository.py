@@ -1,26 +1,23 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from ...models import User
-from ..IDatabaseProvider import IDatabaseProvider
-from .database import Base, engine, session_local
-from .user_model import UserTable
-
-Base.metadata.create_all(bind=engine)
+from hr_core.models.user_model import User
+from hr_core.repository_interfaces.IUsersRepository import IUsersRepository
+from hr_core.sql.tables.users import Users
 
 
-class SQLDatabaseProvider(IDatabaseProvider):
+class SQLUsersRepository(IUsersRepository):
     def __init__(self, db: Session):
         super().__init__()
         self.db = db
 
     def create_user(self, entity: User):
-        user = UserTable(username=entity.username, password=entity.password, role=entity.role)
+        user = Users(username=entity.username, password=entity.password, role=entity.role)
         self.db.add(user)
         self.db.commit()
 
     def query_user(self, username):
-        stmt = select(UserTable).where(UserTable.username == username)
+        stmt = select(Users).where(Users.username == username)
         userEntity = self.db.scalars(stmt).first()
         if not userEntity:
             return
@@ -31,11 +28,3 @@ class SQLDatabaseProvider(IDatabaseProvider):
             role=userEntity.role,
         )
         return user
-
-
-def get_sql_provider():
-    db = session_local()
-    try:
-        yield SQLDatabaseProvider(db)
-    finally:
-        db.close()

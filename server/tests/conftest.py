@@ -1,42 +1,37 @@
 import os
 
-# Set before importing the app: auth.auth reads SECRET_KEY at import time,
-# and CI has no .env file.
+# Set before importing the app: config reads env at import time, and CI has no .env file.
 os.environ["SECRET_KEY"] = "test-secret-key-at-least-32-bytes-long"
 os.environ["ALGORITHM"] = "HS256"
 os.environ["SQLALCHEMY_DATABASE_URL"] = "sqlite://"
+os.environ["DATABASE_PROVIDER"] = "sql"
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app import app
-from auth.database_providers import get_provider
-from auth.database_providers.sql.database import Base
-from auth.database_providers.sql.SQLDatabaseProvider import SQLDatabaseProvider
+from database.init_db import get_sql_db
+from hr_core.sql.session import create_all_tables, create_session_factory
 
 
 @pytest.fixture
 def client():
-    engine = create_engine(
+    testing_session = create_session_factory(
         "sqlite://",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    Base.metadata.create_all(bind=engine)
-    testing_session = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+    create_all_tables(testing_session)
 
-    def override_get_provider():
+    def override_get_sql_db():
         db = testing_session()
         try:
-            yield SQLDatabaseProvider(db)
+            yield db
         finally:
             db.close()
 
-    app.dependency_overrides[get_provider] = override_get_provider
+    app.dependency_overrides[get_sql_db] = override_get_sql_db
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
-    engine.dispose()

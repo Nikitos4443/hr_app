@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from ..models import User
+from hr_core.models.user_model import User
 
 
-class IDatabaseProvider(ABC):
+class IUsersRepository(ABC):
     @abstractmethod
     def create_user(self, entity: User): ...
 
