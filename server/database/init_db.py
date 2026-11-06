@@ -7,7 +7,7 @@ mongo_db = None
 def init_db():
     global SessionLocal, mongo_db
 
-    if DATABASE_PROVIDER == 'sql':
+    if DATABASE_PROVIDER == "sql":
         from hr_core.sql.session import create_all_tables, create_session_factory
 
         SessionLocal = create_session_factory(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
@@ -16,7 +16,7 @@ def init_db():
         if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
             create_all_tables(SessionLocal)
 
-    elif DATABASE_PROVIDER == 'mongo':
+    elif DATABASE_PROVIDER == "mongo":
         from pymongo import MongoClient
 
         client = MongoClient(MONGO_URI)
@@ -24,7 +24,7 @@ def init_db():
 
 
 def get_sql_db():
-    if DATABASE_PROVIDER == 'sql':
+    if DATABASE_PROVIDER == "sql":
         if SessionLocal is None:
             raise RuntimeError("SQL Database is not initialized")
         db = SessionLocal()
@@ -37,7 +37,7 @@ def get_sql_db():
 
 
 def get_mongo_db():
-    if DATABASE_PROVIDER == 'mongo':
+    if DATABASE_PROVIDER == "mongo":
         if mongo_db is None:
             raise RuntimeError("Mongo Database is not initialized")
         return mongo_db

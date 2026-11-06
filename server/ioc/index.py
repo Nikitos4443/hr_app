@@ -10,4 +10,5 @@ from auth.IAuthService import IAuthService
 def get_auth_service(repo: UsersRepoDep) -> IAuthService:
     return AuthService(repo=repo)
 
+
 AuthServiceDep = Annotated[IAuthService, Depends(get_auth_service)]

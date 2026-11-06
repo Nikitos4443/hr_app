@@ -2,13 +2,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
+from ioc.index import AuthServiceDep
 from starlette import status
 
-from ioc.index import AuthServiceDep
 from auth.dto.create_user_request import CreateUserRequest
 from auth.dto.token import Token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=Token)
 async def create_user(
