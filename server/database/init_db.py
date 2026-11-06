@@ -1,26 +1,27 @@
-from config import DATABASE_PROVIDER, SQLALCHEMY_DATABASE_URL, MONGO_URI, MONGO_DB_NAME
+from config import DATABASE_PROVIDER, MONGO_DB_NAME, MONGO_URI, SQLALCHEMY_DATABASE_URL
 
 SessionLocal = None
 mongo_db = None
+
 
 def init_db():
     global SessionLocal, mongo_db
 
     if DATABASE_PROVIDER == 'sql':
-        from sqlalchemy import create_engine
-        from sqlalchemy.orm import sessionmaker
-        from database.sql.connection import Base
-        import database.sql.tables  # noqa: F401  registers all tables in Base.metadata
+        from hr_core.sql.session import create_all_tables, create_session_factory
 
-        engine = create_engine(SQLALCHEMY_DATABASE_URL)
-        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-        Base.metadata.create_all(bind=engine)
+        SessionLocal = create_session_factory(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
+        # Postgres (Neon) schema is managed by Alembic (shared/migrations), never at startup.
+        # Local SQLite is a throwaway dev DB, so just create the tables there.
+        if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+            create_all_tables(SessionLocal)
 
     elif DATABASE_PROVIDER == 'mongo':
         from pymongo import MongoClient
 
         client = MongoClient(MONGO_URI)
         mongo_db = client[MONGO_DB_NAME]
+
 
 def get_sql_db():
     if DATABASE_PROVIDER == 'sql':
@@ -33,6 +34,7 @@ def get_sql_db():
             db.close()
     else:
         yield None
+
 
 def get_mongo_db():
     if DATABASE_PROVIDER == 'mongo':

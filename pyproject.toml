@@ -16,6 +16,7 @@ package = false
 
 [tool.uv.workspace]
 members = [
+    "shared",
     "server",
     "analyzer_lambda",
     "resume_process_lambda",
@@ -25,7 +26,7 @@ members = [
 [tool.ruff]
 target-version = "py314"
 line-length = 100
-extend-exclude = ["infra", "client"]
+extend-exclude = ["infra", "client", "shared/migrations/versions"]
 
 [tool.ruff.lint]
 select = [
@@ -45,6 +46,7 @@ known-first-party = [
     "logger",
     "app",
     "database",
+    "hr_core",
     "output_model",
     "process_cv",
 ]

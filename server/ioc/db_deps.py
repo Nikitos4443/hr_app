@@ -6,33 +6,33 @@ from sqlalchemy.orm import Session
 
 from config import DATABASE_PROVIDER
 from database.init_db import get_mongo_db, get_sql_db
-from database.mongo.repositories.MongoUsersRepository import MongoUsersRepository
-from database.repository_interfaces.IApplicationsRepository import IApplicationsRepository
-from database.repository_interfaces.IEvaluationsRepository import IEvaluationsRepository
-from database.repository_interfaces.IQuestionsRepository import IQuestionsRepository
-from database.repository_interfaces.IResumeVerificationRepository import (
+from hr_core.mongo.repositories.MongoUsersRepository import MongoUsersRepository
+from hr_core.repository_interfaces.IApplicationsRepository import IApplicationsRepository
+from hr_core.repository_interfaces.IEvaluationsRepository import IEvaluationsRepository
+from hr_core.repository_interfaces.IQuestionsRepository import IQuestionsRepository
+from hr_core.repository_interfaces.IResumeVerificationRepository import (
     IResumeVerificationRepository,
 )
-from database.repository_interfaces.ITextVerificationRepository import (
+from hr_core.repository_interfaces.ITextVerificationRepository import (
     ITextVerificationRepository,
 )
-from database.repository_interfaces.IUsersRepository import IUsersRepository
-from database.repository_interfaces.IVacanciesRepository import IVacanciesRepository
-from database.repository_interfaces.IVideoVerificationRepository import (
+from hr_core.repository_interfaces.IUsersRepository import IUsersRepository
+from hr_core.repository_interfaces.IVacanciesRepository import IVacanciesRepository
+from hr_core.repository_interfaces.IVideoVerificationRepository import (
     IVideoVerificationRepository,
 )
-from database.sql.repositories.SQLApplicationsRepository import SQLApplicationsRepository
-from database.sql.repositories.SQLEvaluationsRepository import SQLEvaluationsRepository
-from database.sql.repositories.SQLQuestionsRepository import SQLQuestionsRepository
-from database.sql.repositories.SQLResumeVerificationRepository import (
+from hr_core.sql.repositories.SQLApplicationsRepository import SQLApplicationsRepository
+from hr_core.sql.repositories.SQLEvaluationsRepository import SQLEvaluationsRepository
+from hr_core.sql.repositories.SQLQuestionsRepository import SQLQuestionsRepository
+from hr_core.sql.repositories.SQLResumeVerificationRepository import (
     SQLResumeVerificationRepository,
 )
-from database.sql.repositories.SQLTextVerificationRepository import (
+from hr_core.sql.repositories.SQLTextVerificationRepository import (
     SQLTextVerificationRepository,
 )
-from database.sql.repositories.SQLUsersRepository import SQLUsersRepository
-from database.sql.repositories.SQLVacanciesRepository import SQLVacanciesRepository
-from database.sql.repositories.SQLVideoVerificationRepository import (
+from hr_core.sql.repositories.SQLUsersRepository import SQLUsersRepository
+from hr_core.sql.repositories.SQLVacanciesRepository import SQLVacanciesRepository
+from hr_core.sql.repositories.SQLVideoVerificationRepository import (
     SQLVideoVerificationRepository,
 )
 

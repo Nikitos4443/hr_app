@@ -1,0 +1,21 @@
+[project]
+name = "hr-core"
+version = "0.1.0"
+description = "Shared domain models, repository interfaces and DB implementations for the server and lambdas"
+requires-python = ">=3.14"
+dependencies = [
+    "pydantic>=2.14.1",
+    "sqlalchemy>=2.1.6",
+    "psycopg[binary]>=3.2",
+    "pymongo>=4.19.0",
+]
+
+[dependency-groups]
+# Migrations run from a dev machine / CI, so alembic stays out of the lambda and server bundles.
+dev = [
+    "alembic>=1.20.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14"]
+build-backend = "uv_build"

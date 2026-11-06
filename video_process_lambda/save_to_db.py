@@ -1,12 +1,12 @@
-from db_init import CandidateVideoTranscriptions, init
+from db import SessionLocal
+
+from hr_core.sql.repositories.SQLVideoVerificationRepository import (
+    SQLVideoVerificationRepository,
+)
 
 
-async def save_to_db(file_id: str, text: str):
-    # Client is bound to the event loop, and asyncio.run creates a new loop per invocation
-    client = await init()
-    try:
-        candidate_video_transcription = await CandidateVideoTranscriptions.get(file_id)
-        candidate_video_transcription.transcription = text
-        await candidate_video_transcription.save()
-    finally:
-        await client.close()
+def save_to_db(verification_id: int, text: str) -> None:
+    with SessionLocal() as session:
+        repo = SQLVideoVerificationRepository(db=session)
+        if repo.save_transcription(verification_id, text) is None:
+            raise LookupError(f"video_verification {verification_id} not found")

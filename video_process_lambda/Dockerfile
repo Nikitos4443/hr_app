@@ -8,7 +8,7 @@ ENV UV_LINK_MODE=copy UV_COMPILE_BYTECODE=1
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,target=/src \
     cd /src && \
-    uv export --frozen --no-dev --no-emit-workspace --package video-process-lambda -o /tmp/requirements.txt && \
+    uv export --frozen --no-dev --no-editable --package video-process-lambda -o /tmp/requirements.txt && \
     uv pip install --target "${LAMBDA_TASK_ROOT}" -r /tmp/requirements.txt
 
 # Bake the model into the image so cold starts don't download it from HuggingFace

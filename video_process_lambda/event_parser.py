@@ -14,7 +14,7 @@ def parse_event_download_s3_file(lambda_event, local_dir):
         for s3_record in s3_event.get("Records", []):
             bucket = s3_record["s3"]["bucket"]["name"]
             key = unquote_plus(s3_record["s3"]["object"]["key"])
-            # Key is raw/videos/<file_id>[.ext], the file name is the transcription document id
+            # Key is raw/videos/<file_id>[.ext], the file name is the video_verification row id
             file_name = key.rsplit("/", 1)[-1]
             file_id = os.path.splitext(file_name)[0]
             file_path = os.path.join(local_dir, file_name)

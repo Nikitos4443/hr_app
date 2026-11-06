@@ -3,8 +3,13 @@
 !uv.lock
 !*/pyproject.toml
 !server
+!shared
+!video_process_lambda
 **/__pycache__
 **/.venv
 **/.ruff_cache
 **/*.db
+# Never ship secrets into a build context or image
+**/.env
+**/.env.*
 server/tests

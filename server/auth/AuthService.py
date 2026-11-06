@@ -12,8 +12,8 @@ from starlette import status
 from auth.IAuthService import IAuthService
 from auth.dto.create_user_request import CreateUserRequest
 from config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, ALGORITHM
-from database.models.user_model import User
-from database.repository_interfaces.IUsersRepository import IUsersRepository
+from hr_core.models.user_model import User
+from hr_core.repository_interfaces.IUsersRepository import IUsersRepository
 
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
