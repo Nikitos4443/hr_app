@@ -10,8 +10,6 @@ MODEL_DIR = os.getenv("WHISPER_MODEL_DIR", "/opt/whisper-model")
 
 model = WhisperModel(MODEL_DIR, device="cpu", compute_type="int8")
 
-# Read from env first (local runs), the rest from SSM Parameter Store (SecureString).
-# DATABASE_URL format for RDS Postgres: postgresql+psycopg://<user>:<password>@<host>:5432/<db>
 PARAMETER_NAMES = ["DATABASE_URL"]
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
