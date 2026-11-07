@@ -12,7 +12,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install --target "${LAMBDA_TASK_ROOT}" -r /tmp/requirements.txt
 
 # Bake the model into the image so cold starts don't download it from HuggingFace
-ARG WHISPER_MODEL=base
+ARG WHISPER_MODEL=small.en
 ENV WHISPER_MODEL_DIR=/opt/whisper-model
 RUN PYTHONPATH="${LAMBDA_TASK_ROOT}" python3 -c \
     "from faster_whisper import download_model; download_model('${WHISPER_MODEL}', output_dir='${WHISPER_MODEL_DIR}')"
