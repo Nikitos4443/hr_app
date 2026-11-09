@@ -16,3 +16,7 @@ class SQLVacanciesRepository(IVacanciesRepository):
         self.db.commit()
         self.db.refresh(row)
         return Vacancy.model_validate(row)
+
+    def get_by_id(self, vacancy_id: int) -> Vacancy | None:
+        row = self.db.get(Vacancies, vacancy_id)
+        return None if row is None else Vacancy.model_validate(row)

@@ -9,6 +9,7 @@ class Application(BaseModel):
     id: int | None = None
     vacancy_id: int
     email: str
-    full_name: str
+    full_name: str | None = None
     status: str = "pending"
     created_at: datetime | None = None
+    rejection_notified_at: datetime | None = None

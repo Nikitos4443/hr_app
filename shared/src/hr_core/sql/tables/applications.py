@@ -15,3 +15,4 @@ class Applications(Base):
     full_name = Column(String, nullable=False)
     status = Column(String, nullable=False, default="pending")
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    rejection_notified_at = Column(DateTime(timezone=True), nullable=True)
