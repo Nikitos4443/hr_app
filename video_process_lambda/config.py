@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+import logging
 
 from faster_whisper import WhisperModel
 from hr_core.config.parameters import load_parameters
@@ -9,6 +10,8 @@ MODEL_DIR = os.getenv("WHISPER_MODEL_DIR", "/opt/whisper-model")
 model = WhisperModel(MODEL_DIR, device="cpu", compute_type="int8")
 
 PARAMETER_NAMES = ["DATABASE_URL", "BUCKET_NAME"]
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 @dataclass(frozen=True)
