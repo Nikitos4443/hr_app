@@ -8,17 +8,18 @@ MODEL_DIR = os.getenv("WHISPER_MODEL_DIR", "/opt/whisper-model")
 
 model = WhisperModel(MODEL_DIR, device="cpu", compute_type="int8")
 
-PARAMETER_NAMES = ["DATABASE_URL"]
+PARAMETER_NAMES = ["DATABASE_URL", "BUCKET_NAME"]
 
 
 @dataclass(frozen=True)
 class Settings:
     database_url: str
+    bucket_name: str
 
 
 def _load_settings() -> Settings:
     values = load_parameters(PARAMETER_NAMES)
-    return Settings(database_url=values["DATABASE_URL"])
+    return Settings(database_url=values["DATABASE_URL"], bucket_name=values["BUCKET_NAME"])
 
 
 settings = _load_settings()

@@ -1,3 +1,4 @@
+from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from hr_core.models.text_verification_model import TextVerification as TextVerificationModel
@@ -16,3 +17,9 @@ class SQLTextVerificationRepository(ITextVerificationRepository):
         self.db.commit()
         self.db.refresh(row)
         return TextVerificationModel.model_validate(row)
+
+    def delete_by_application(self, application_id: int) -> None:
+        self.db.execute(
+            delete(TextVerification).where(TextVerification.application_id == application_id)
+        )
+        self.db.commit()

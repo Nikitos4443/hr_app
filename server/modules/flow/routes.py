@@ -6,6 +6,7 @@ from config import BUCKET_NAME
 from hr_core.s3.service import S3Service
 from ioc.index import S3ServiceDep, ResumeServiceDep, ApplicationsServiceDep
 from modules.applications.dto.create_application_dto import CreateApplicationDTO
+from modules.flow.dependencies import ActiveApplicationDep
 
 router = APIRouter(prefix="/flow", tags=["flow"])
 
@@ -23,4 +24,12 @@ class FlowRouter:
         s3_key = self.s3Service.get_resume_key(application.id)
         presigned_url = self.s3Service.create_presigned_post_url(BUCKET_NAME, s3_key)
 
-        return {presigned_url}
+        return presigned_url
+
+    @router.get("/screening/{token}")
+    async def get_screening(self, application: ActiveApplicationDep):
+        return {
+            "application_id": application.id,
+            "vacancy_id": application.vacancy_id,
+            "status": application.status,
+        }

@@ -5,8 +5,7 @@ from hr_core.sql.repositories.SQLVideoVerificationRepository import (
 )
 
 
-def save_to_db(verification_id: int, text: str) -> None:
+def save_to_db(verification_id: int, text: str) -> bool:
     with SessionLocal() as session:
         repo = SQLVideoVerificationRepository(db=session)
-        if repo.save_transcription(verification_id, text) is None:
-            raise LookupError(f"video_verification {verification_id} not found")
+        return repo.save_transcription(verification_id, text) is not None

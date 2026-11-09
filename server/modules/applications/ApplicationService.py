@@ -16,3 +16,6 @@ class ApplicationsService(IApplicationService):
         )
 
         return self.repo.create(application_model)
+
+    async def get_by_screening_token(self, token: str) -> Application | None:
+        return self.repo.get_by_screening_token(token)

@@ -1,11 +1,15 @@
 import logging
 import tempfile
 
+from config import settings
 from event_parser import parse_event_download_s3_files
 from get_vacancy import get_vacancy
-from notify_rejected import notify_rejected
+from notify import notify_invited, notify_rejected
 from process_cv import process_cv
+from purge_rejected import purge_rejected
 from save_to_db import save_to_db
+
+from hr_core.s3.service import S3Service
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -19,15 +23,24 @@ def index(event, context):
             result = process_cv(file_path, vacancy)
             if not result.is_resume:
                 logger.info("Application %s file is not a resume: %s", application_id, result.description)
+                S3Service().delete_objects(settings.bucket_name, [s3_key])
                 continue
 
-            rejected = save_to_db(application_id, vacancy.id, s3_key, result)
-            logger.info("Saved resume score %s for application %s", result.score, application_id)
-            if rejected is not None:
-                logger.info("Rejected application %s", rejected.id)
+            rejected_id = save_to_db(application_id, vacancy.id, s3_key, result)
+            logger.info(
+                "Saved resume score %s for application %s, rejected %s",
+                result.score,
+                application_id,
+                rejected_id,
+            )
 
-            notified = notify_rejected(vacancy)
-            if notified:
-                logger.info("Notified rejected applications %s", notified)
+            purged = purge_rejected(vacancy.id)
+            logger.info("Purged applications %s", purged)
+
+            notified_rejected = notify_rejected(vacancy)
+            logger.info("Sent rejection to applications %s", notified_rejected)
+
+            notified_invited = notify_invited(vacancy)
+            logger.info("Sent screening invite to applications %s", notified_invited)
 
     return {"statusCode": 200}

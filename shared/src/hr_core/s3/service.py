@@ -22,4 +22,14 @@ class S3Service:
         return response
 
     def get_resume_key(self, application_id):
-        return f"{BUCKET_RESUME_PREFIX}/{application_id}.pdf"
+        return f"{BUCKET_RESUME_PREFIX}{application_id}.pdf"
+
+    def delete_objects(self, bucket_name: str, keys: list[str]) -> None:
+        if not keys:
+            return
+        response = s3_client.delete_objects(
+            Bucket=bucket_name,
+            Delete={"Objects": [{"Key": key} for key in keys], "Quiet": True},
+        )
+        if response.get("Errors"):
+            raise RuntimeError(f"Failed to delete S3 objects: {response['Errors']}")

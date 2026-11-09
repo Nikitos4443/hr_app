@@ -1,3 +1,5 @@
+import secrets
+
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, UniqueConstraint, func
 
 from hr_core.sql.base import Base
@@ -12,7 +14,12 @@ class Applications(Base):
     id = Column(Integer, primary_key=True)
     vacancy_id = Column(Integer, ForeignKey("vacancies.id"), nullable=False, index=True)
     email = Column(String, nullable=False, index=True)
-    full_name = Column(String, nullable=False)
+    full_name = Column(String, nullable=True)
     status = Column(String, nullable=False, default="pending")
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    screening_token = Column(
+        String, nullable=False, unique=True, default=lambda: secrets.token_urlsafe(32)
+    )
+    screening_invited_at = Column(DateTime(timezone=True), nullable=True)
     rejection_notified_at = Column(DateTime(timezone=True), nullable=True)
+    purged_at = Column(DateTime(timezone=True), nullable=True)

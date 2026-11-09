@@ -1,3 +1,4 @@
+from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from hr_core.models.evaluation_model import Evaluation
@@ -16,3 +17,7 @@ class SQLEvaluationsRepository(IEvaluationsRepository):
         self.db.commit()
         self.db.refresh(row)
         return Evaluation.model_validate(row)
+
+    def delete_by_application(self, application_id: int) -> None:
+        self.db.execute(delete(Evaluations).where(Evaluations.application_id == application_id))
+        self.db.commit()

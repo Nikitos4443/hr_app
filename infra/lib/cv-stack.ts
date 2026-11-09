@@ -44,6 +44,10 @@ export class CVPipelineStack extends cdk.Stack {
       parameterName: 'SMTP_PASSWORD',
     })
 
+    const frontendUrlParameter = ssm.StringParameter.fromStringParameterAttributes(this, 'FrontendUrl', {
+      parameterName: 'FRONTEND_URL',
+    })
+
     const queue = new sqs.Queue(this, 'CVPipelineQueue', {
       visibilityTimeout: Duration.seconds(lambdaTimeout.toSeconds() * 2),
     });
@@ -53,9 +57,11 @@ export class CVPipelineStack extends cdk.Stack {
       handler: 'app.index',
       timeout: lambdaTimeout,
       code: pythonLambdaCode('resume_process_lambda', 'resume-process-lambda'),
+      environment: { BUCKET_NAME: bucketName },
     });
 
     bucket.grantRead(fn);
+    bucket.grantDelete(fn);
     bucket.addEventNotification(
         s3.EventType.OBJECT_CREATED,
         new s3n.SqsDestination(queue),
@@ -65,6 +71,7 @@ export class CVPipelineStack extends cdk.Stack {
     geminiKeyParameter.grantRead(fn);
     gmailUserParameter.grantRead(fn);
     gmailAppPasswordParameter.grantRead(fn);
+    frontendUrlParameter.grantRead(fn);
 
     const eventSource = new SqsEventSource(queue);
     fn.addEventSource(eventSource);

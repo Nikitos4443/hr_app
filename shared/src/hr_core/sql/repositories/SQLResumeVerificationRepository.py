@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from hr_core.models.resume_verification_model import (
@@ -44,25 +44,9 @@ class SQLResumeVerificationRepository(IResumeVerificationRepository):
         self.db.refresh(row)
         return ResumeVerificationModel.model_validate(row)
 
-    def count_active(self, vacancy_id: int) -> int:
-        return self.db.scalar(
-            select(func.count()).select_from(self._active(vacancy_id).subquery())
-        )
-
-    def get_lowest_active_below(
-        self, vacancy_id: int, threshold: float
-    ) -> ResumeVerificationModel | None:
-        row = self.db.scalar(
-            self._active(vacancy_id)
-            .where(ResumeVerification.score < threshold)
-            .order_by(ResumeVerification.score, ResumeVerification.id)
-            .limit(1)
-        )
-        return None if row is None else ResumeVerificationModel.model_validate(row)
-
-    def _active(self, vacancy_id: int):
-        return (
-            select(ResumeVerification)
+    def get_active_scores(self, vacancy_id: int) -> dict[int, float]:
+        rows = self.db.execute(
+            select(ResumeVerification.application_id, ResumeVerification.score)
             .join(Applications, Applications.id == ResumeVerification.application_id)
             .where(
                 Applications.vacancy_id == vacancy_id,
@@ -70,3 +54,16 @@ class SQLResumeVerificationRepository(IResumeVerificationRepository):
                 ResumeVerification.status == "done",
             )
         )
+        return {application_id: score for application_id, score in rows}
+
+    def get_by_application(self, application_id: int) -> ResumeVerificationModel | None:
+        row = self.db.scalar(
+            select(ResumeVerification).where(ResumeVerification.application_id == application_id)
+        )
+        return None if row is None else ResumeVerificationModel.model_validate(row)
+
+    def delete_by_application(self, application_id: int) -> None:
+        self.db.execute(
+            delete(ResumeVerification).where(ResumeVerification.application_id == application_id)
+        )
+        self.db.commit()
