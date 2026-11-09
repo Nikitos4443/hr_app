@@ -54,7 +54,7 @@ export class VideoPipelineStack extends cdk.Stack {
         new s3n.SqsDestination(queue),
         { prefix: BUCKET_RAW_VIDEOS_PREFIX }
     );
-    const eventSource = new SqsEventSource(queue);
+    const eventSource = new SqsEventSource(queue, { batchSize: 1 });
     fn.addEventSource(eventSource);
   }
 }
