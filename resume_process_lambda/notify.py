@@ -1,6 +1,6 @@
-from config import notification_channel, settings
 from db import SessionLocal
 
+from config import notification_channel, settings
 from hr_core.models.application_model import Application
 from hr_core.models.vacancy_model import Vacancy
 from hr_core.sql.repositories.SQLApplicationsRepository import SQLApplicationsRepository

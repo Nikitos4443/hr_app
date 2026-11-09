@@ -1,15 +1,15 @@
 import logging
 import tempfile
 
-from config import settings
 from event_parser import parse_event_download_s3_files
 from get_vacancy import get_vacancy
 from notify import notify_invited, notify_rejected
-from process_cv import process_cv
 from purge_rejected import purge_rejected
 from save_to_db import save_to_db
 
+from config import settings
 from hr_core.s3.service import S3Service
+from process_cv import process_cv
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -22,7 +22,9 @@ def index(event, context):
             vacancy = get_vacancy(application_id)
             result = process_cv(file_path, vacancy)
             if not result.is_resume:
-                logger.info("Application %s file is not a resume: %s", application_id, result.description)
+                logger.info(
+                    "Application %s file is not a resume: %s", application_id, result.description
+                )
                 S3Service().delete_objects(settings.bucket_name, [s3_key])
                 continue
 

@@ -1,8 +1,7 @@
 from fastapi import UploadFile
-from fastapi.security import OAuth2PasswordBearer
+from modules.flow.services.IResumeService import IResumeService
 
 from hr_core.repository_interfaces.IUsersRepository import IUsersRepository
-from modules.flow.services.IResumeService import IResumeService
 
 
 class ResumeService(IResumeService):

@@ -5,15 +5,14 @@ from botocore.exceptions import ClientError
 
 from hr_core.constants.index import BUCKET_RESUME_PREFIX
 
-s3_client = boto3.client('s3')
+s3_client = boto3.client("s3")
+
 
 class S3Service:
     def create_presigned_post_url(self, bucket_name, object_name, expiration=3600):
         try:
             response = s3_client.generate_presigned_post(
-                bucket_name,
-                object_name,
-                ExpiresIn=expiration
+                bucket_name, object_name, ExpiresIn=expiration
             )
         except ClientError as e:
             logging.error(e)

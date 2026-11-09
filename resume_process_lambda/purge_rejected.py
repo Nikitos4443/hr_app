@@ -1,6 +1,6 @@
-from config import settings
 from db import SessionLocal
 
+from config import settings
 from hr_core.s3.service import S3Service
 from hr_core.services.CandidateCleanupService import CandidateCleanupService
 from hr_core.sql.repositories.SQLApplicationsRepository import SQLApplicationsRepository
