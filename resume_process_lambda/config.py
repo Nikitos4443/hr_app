@@ -1,50 +1,50 @@
-import logging
-import os
-import time
 from dataclasses import dataclass
 
-import boto3
 from dotenv import load_dotenv
+from hr_core.config.parameters import load_parameters
+from hr_core.notifications.EmailNotificationChannel import EmailNotificationChannel
+from hr_core.notifications.INotificationChannel import INotificationChannel
 
 load_dotenv()
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+PARAMETER_NAMES = [
+    "DATABASE_URL",
+    "GOOGLE_API_KEY",
+    "SMTP_USER",
+    "SMTP_PASSWORD",
+    "BUCKET_NAME",
+    "FRONTEND_URL",
+]
 
-PARAMETER_NAMES = ["MONGO_URI", "MONGO_DB_NAME", "GOOGLE_API_KEY"]
+SCORE_THRESHOLD = 50
+MIN_CANDIDATES = 10
+MAX_PAGES = 3
 
 
 @dataclass(frozen=True)
 class Settings:
-    mongo_uri: str
-    mongo_db_name: str
+    database_url: str
     google_api_key: str
-
-
-def _load_parameters() -> dict:
-    # Locally values come from .env, in Lambda everything missing is fetched from Parameter Store
-    values = {name: os.environ[name] for name in PARAMETER_NAMES if os.getenv(name)}
-    missing = [name for name in PARAMETER_NAMES if name not in values]
-    if not missing:
-        return values
-
-    start = time.perf_counter()
-    response = boto3.client("ssm").get_parameters(Names=missing, WithDecryption=True)
-    if response["InvalidParameters"]:
-        raise RuntimeError(f"Missing SSM parameters: {response['InvalidParameters']}")
-    values.update({p["Name"]: p["Value"] for p in response["Parameters"]})
-    logger.info("Loaded %s from SSM in %.3fs", missing, time.perf_counter() - start)
-    return values
+    gmail_user: str
+    gmail_app_password: str
+    bucket_name: str
+    frontend_url: str
 
 
 def _load_settings() -> Settings:
-    values = _load_parameters()
+    values = load_parameters(PARAMETER_NAMES)
     return Settings(
-        mongo_uri=values["MONGO_URI"],
-        mongo_db_name=values["MONGO_DB_NAME"],
+        database_url=values["DATABASE_URL"],
         google_api_key=values["GOOGLE_API_KEY"],
+        gmail_user=values["SMTP_USER"],
+        gmail_app_password=values["SMTP_PASSWORD"],
+        bucket_name=values["BUCKET_NAME"],
+        frontend_url=values["FRONTEND_URL"].rstrip("/"),
     )
 
 
-# Runs once per cold start, warm invocations reuse the same object
 settings = _load_settings()
+
+notification_channel: INotificationChannel = EmailNotificationChannel(
+    settings.gmail_user, settings.gmail_app_password
+)

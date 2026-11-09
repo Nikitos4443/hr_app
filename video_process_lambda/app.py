@@ -1,9 +1,12 @@
 import logging
 import tempfile
 
+from config import settings
 from event_parser import parse_event_download_s3_file
 from save_to_db import save_to_db
 from transcribe_video import transcribe
+
+from hr_core.s3.service import S3Service
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -16,11 +19,14 @@ def index(event, context):
             logger.info("No S3 records in event: %s", event)
             return {"statusCode": 200}
 
-        file_path, file_id = parsed
+        file_path, s3_key, file_id = parsed
         # S3 key is raw/videos/<video_verification.id>.<ext>
         verification_id = int(file_id)
         text = transcribe(file_path)
-        save_to_db(verification_id, text)
+        if not save_to_db(verification_id, text):
+            S3Service().delete_objects(settings.bucket_name, [s3_key])
+            logger.info("video_verification %s not found, deleted %s", verification_id, s3_key)
+            return {"statusCode": 200}
 
     logger.info("Saved transcription for video_verification %s", verification_id)
     return {"statusCode": 200}

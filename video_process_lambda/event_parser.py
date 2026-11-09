@@ -20,6 +20,6 @@ def parse_event_download_s3_file(lambda_event, local_dir):
             file_path = os.path.join(local_dir, file_name)
 
             s3.download_file(bucket, key, file_path)
-            return file_path, file_id
+            return file_path, key, file_id
 
     return None

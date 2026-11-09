@@ -11,3 +11,9 @@ class IVideoVerificationRepository(ABC):
     def save_transcription(
         self, verification_id: int, transcription: str
     ) -> VideoVerification | None: ...
+
+    @abstractmethod
+    def list_by_application(self, application_id: int) -> list[VideoVerification]: ...
+
+    @abstractmethod
+    def delete_by_application(self, application_id: int) -> None: ...

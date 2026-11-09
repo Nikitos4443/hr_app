@@ -10,6 +10,11 @@ dependencies = [
     "pymongo>=4.19.0",
 ]
 
+[project.optional-dependencies]
+email = [
+    "yagmail>=0.16.0",
+]
+
 [dependency-groups]
 # Migrations run from a dev machine / CI, so alembic stays out of the lambda and server bundles.
 dev = [

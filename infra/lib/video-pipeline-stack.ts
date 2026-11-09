@@ -45,16 +45,18 @@ export class VideoPipelineStack extends cdk.Stack {
       architecture: lambda.Architecture.X86_64,
       timeout: lambdaTimeout,
       memorySize: 3008,
+      environment: { BUCKET_NAME: bucketName },
     });
 
     bucket.grantRead(fn);
+    bucket.grantDelete(fn);
     databaseUrlParameter.grantRead(fn);
     bucket.addEventNotification(
         s3.EventType.OBJECT_CREATED,
         new s3n.SqsDestination(queue),
         { prefix: BUCKET_RAW_VIDEOS_PREFIX }
     );
-    const eventSource = new SqsEventSource(queue);
+    const eventSource = new SqsEventSource(queue, { batchSize: 1 });
     fn.addEventSource(eventSource);
   }
 }

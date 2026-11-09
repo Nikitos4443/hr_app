@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from hr_core.models.video_verification_model import VideoVerification as VideoVerificationModel
@@ -31,3 +32,15 @@ class SQLVideoVerificationRepository(IVideoVerificationRepository):
         self.db.commit()
         self.db.refresh(row)
         return VideoVerificationModel.model_validate(row)
+
+    def list_by_application(self, application_id: int) -> list[VideoVerificationModel]:
+        rows = self.db.scalars(
+            select(VideoVerification).where(VideoVerification.application_id == application_id)
+        )
+        return [VideoVerificationModel.model_validate(row) for row in rows]
+
+    def delete_by_application(self, application_id: int) -> None:
+        self.db.execute(
+            delete(VideoVerification).where(VideoVerification.application_id == application_id)
+        )
+        self.db.commit()
