@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from auth.dto.create_user_request import CreateUserRequest
+from modules.auth.dto.create_user_request import CreateUserRequest
 
 
 class IAuthService(ABC):

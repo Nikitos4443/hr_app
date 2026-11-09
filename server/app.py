@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from auth import routes as auth_routes
+from modules.auth import routes as auth_routes
 from database.init_db import init_db
 
 init_db()
