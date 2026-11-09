@@ -1,34 +1,33 @@
-import json
-import os
-from urllib.parse import unquote_plus
+import logging
+import tempfile
 
-import boto3
-
+from event_parser import parse_event_download_s3_files
+from get_vacancy import get_vacancy
+from notify_rejected import notify_rejected
 from process_cv import process_cv
+from save_to_db import save_to_db
 
-s3 = boto3.client("s3")
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def index(event, context):
-    print("Iterating records")
-    for record in event["Records"]:
-        print("Got record")
-        s3_event = json.loads(record["body"])
-        print("Loaded event")
-        for s3_record in s3_event.get("Records", []):
-            print("Getting bucket name")
-            bucket = s3_record["s3"]["bucket"]["name"]
-            print("Gettin key")
-            key = unquote_plus(s3_record["s3"]["object"]["key"])
-            print("Parsing vacancy id")
-            _, vacancy_id, filename = key.split("/")
-            local_path = f"/tmp/{filename}"
-            print("Downloading file")
-            s3.download_file(bucket, key, local_path)
-            try:
-                print("Processing CV")
-                result = process_cv(local_path, vacancy_id)
-            finally:
-                os.remove(local_path)
+    with tempfile.TemporaryDirectory() as local_dir:
+        for file_path, s3_key, file_id in parse_event_download_s3_files(event, local_dir):
+            application_id = int(file_id)
+            vacancy = get_vacancy(application_id)
+            result = process_cv(file_path, vacancy)
+            if not result.is_resume:
+                logger.info("Application %s file is not a resume: %s", application_id, result.description)
+                continue
 
-    return {"result": result, "statusCode": 200}
+            rejected = save_to_db(application_id, vacancy.id, s3_key, result)
+            logger.info("Saved resume score %s for application %s", result.score, application_id)
+            if rejected is not None:
+                logger.info("Rejected application %s", rejected.id)
+
+            notified = notify_rejected(vacancy)
+            if notified:
+                logger.info("Notified rejected applications %s", notified)
+
+    return {"statusCode": 200}

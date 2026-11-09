@@ -9,13 +9,16 @@ dependencies = [
     "langchain-community>=0.4.2",
     "langchain-google-genai>=4.4.2",
     "pydantic>=2.14.1",
-    "pymongo>=4.19.0",
     "pypdf>=6.21.2",
     "python-dotenv>=1.2.4",
+    "hr-core[email]",
 ]
 
 [tool.uv]
 package = false
+
+[tool.uv.sources]
+hr-core = { workspace = true }
 
 [dependency-groups]
 dev = [

@@ -1,23 +1,18 @@
-import logging
-import time
-
 from langchain.agents import create_agent
-from langchain.agents.middleware import ToolCallLimitMiddleware
 from langchain.chat_models import init_chat_model
-from langchain.tools import tool
 from langchain_community.document_loaders import PyPDFLoader
 
-from config import settings
-from database import get_vacancy
+from config import MAX_PAGES, settings
+from hr_core.models.vacancy_model import Vacancy
 from output_model import OutputModel
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 SYSTEM_PROMPT = """You are an HR assistant that scores how well a CV matches a job vacancy.
 
+Vacancy:
+{vacancy}
+
 Workflow:
-1. Call the "get_vacancy" tool exactly once with vacancy id `{vacancy_id}`. Never call it again.
+1. Decide whether the document is a CV/resume at all. If it is not, set is_resume to false, score to 0 and explain in the description what the document is.
 2. Compare the CV against the vacancy: requirements, responsibilities, years of experience and nice-to-have skills.
 3. Return the final numerical assessment.
 
@@ -27,34 +22,19 @@ Scoring rules:
 - The description explains the score in 5-6 sentences. Description must be in English."""  # noqa: E501
 
 
-@tool(
-    "get_vacancy",
-    description=("Get full vacancy data from mongo by id. The result is complete, call only once."),
-)
-def get_job(id: str) -> dict:
-    vacancy = get_vacancy(id)
-    if vacancy is None:
-        return {"error": f"Vacancy {id} not found"}
-    return vacancy
-
-
-def process_cv(path, id):
-    print(f"Path: {path}, id: {id}")
-    docs = PyPDFLoader(path, mode="single").load()
-    print("Creating agent")
+def process_cv(path: str, vacancy: Vacancy) -> OutputModel:
+    pages = PyPDFLoader(path, mode="page").load()[:MAX_PAGES]
+    content = "\n\n".join(page.page_content for page in pages)
     agent = create_agent(
         model=init_chat_model(
             "google_genai:gemini-3.5-flash-lite", google_api_key=settings.google_api_key
         ),
-        tools=[get_job],
-        system_prompt=SYSTEM_PROMPT.format(vacancy_id=id),
+        system_prompt=SYSTEM_PROMPT.format(
+            vacancy=vacancy.model_dump_json(
+                exclude={"id", "created_by", "status", "selection_status", "created_at"}
+            )
+        ),
         response_format=OutputModel,
-        middleware=[ToolCallLimitMiddleware(tool_name="get_vacancy", run_limit=1)],
     )
-
-    print("Invoking agent")
-    start = time.perf_counter()
-
-    response = agent.invoke({"messages": [{"role": "user", "content": docs[0].page_content}]})
-    logger.info("agent.invoke took %.3fs", time.perf_counter() - start)
+    response = agent.invoke({"messages": [{"role": "user", "content": content}]})
     return response["structured_response"]

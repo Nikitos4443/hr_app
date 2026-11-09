@@ -27,19 +27,21 @@ export class CVPipelineStack extends cdk.Stack {
       bucketName,
     });
 
-    const  mongoUriParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'MySecretMongoUri', {
-      parameterName: 'MONGO_URI',
-      version: 1
-    })
-
-    const  mongoNameParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'MySecretMongoName', {
-      parameterName: 'MONGO_DB_NAME',
-      version: 1
+    const databaseUrlParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'DatabaseUrl', {
+      parameterName: 'DATABASE_URL',
     })
 
     const  geminiKeyParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'MySecretLLMAPI', {
       parameterName: 'GOOGLE_API_KEY',
       version: 1
+    })
+
+    const gmailUserParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'GmailUser', {
+      parameterName: 'SMTP_USER',
+    })
+
+    const gmailAppPasswordParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'GmailAppPassword', {
+      parameterName: 'SMTP_PASSWORD',
     })
 
     const queue = new sqs.Queue(this, 'CVPipelineQueue', {
@@ -59,9 +61,10 @@ export class CVPipelineStack extends cdk.Stack {
         new s3n.SqsDestination(queue),
         { prefix: BUCKET_CV_PREFIX }
     );
-    mongoUriParameter.grantRead(fn);
-    mongoNameParameter.grantRead(fn);
+    databaseUrlParameter.grantRead(fn);
     geminiKeyParameter.grantRead(fn);
+    gmailUserParameter.grantRead(fn);
+    gmailAppPasswordParameter.grantRead(fn);
 
     const eventSource = new SqsEventSource(queue);
     fn.addEventSource(eventSource);
