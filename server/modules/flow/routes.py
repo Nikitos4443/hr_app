@@ -4,6 +4,7 @@ from ioc.index import (
     get_applications_service,
     get_resume_service,
     get_s3_service,
+    get_text_service,
     get_video_service,
 )
 from starlette import status
@@ -14,8 +15,10 @@ from modules.applications.dto.create_application_dto import CreateApplicationDTO
 from modules.applications.IApplicationService import IApplicationService
 from modules.flow.dependencies import ActiveApplicationDep
 from modules.flow.dto.create_resume_verification_dto import CreateResumeVerificationDTO
-from modules.flow.errors import VideoFlowError
+from modules.flow.dto.save_text_answer_dto import SaveTextAnswerDTO
+from modules.flow.errors import ScreeningError
 from modules.flow.services.IResumeService import IResumeService
+from modules.flow.services.ITextService import ITextService
 from modules.flow.services.IVideoService import IVideoService
 
 router = APIRouter(prefix="/flow", tags=["flow"])
@@ -27,6 +30,7 @@ class FlowRouter:
     applications_service: IApplicationService = Depends(get_applications_service)
     resume_service: IResumeService = Depends(get_resume_service)
     video_service: IVideoService = Depends(get_video_service)
+    text_service: ITextService = Depends(get_text_service)
 
     @router.post("/resume-get-presigned-post-url", status_code=status.HTTP_201_CREATED)
     async def get_resume_presigned_url_and_create_application(self, dto: CreateApplicationDTO):
@@ -69,7 +73,7 @@ class FlowRouter:
             verification = await self.video_service.prepare_video_verification(
                 application, question_id
             )
-        except VideoFlowError as e:
+        except ScreeningError as e:
             raise HTTPException(status_code=e.status_code, detail=e.detail) from e
 
         s3_key = self.s3Service.get_video_key(verification.id)
@@ -80,3 +84,13 @@ class FlowRouter:
                 detail="Failed to create video upload URL",
             )
         return presigned_post
+
+    @router.put("/screening/{token}/questions/{question_id}/text-answer")
+    async def save_text_answer(
+        self, application: ActiveApplicationDep, question_id: int, dto: SaveTextAnswerDTO
+    ):
+        try:
+            verification = await self.text_service.save_answer(application, question_id, dto.answer)
+        except ScreeningError as e:
+            raise HTTPException(status_code=e.status_code, detail=e.detail) from e
+        return {"question_id": question_id, "status": verification.status}

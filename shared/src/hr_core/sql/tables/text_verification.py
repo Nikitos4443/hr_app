@@ -1,10 +1,15 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 
 from hr_core.sql.base import Base
 
 
 class TextVerification(Base):
     __tablename__ = "text_verification"
+    __table_args__ = (
+        UniqueConstraint(
+            "application_id", "question_id", name="uq_text_verification_application_question"
+        ),
+    )
 
     id = Column(Integer, primary_key=True)
     application_id = Column(Integer, ForeignKey("applications.id"), nullable=False, index=True)
