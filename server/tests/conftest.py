@@ -2,6 +2,7 @@ import os
 
 # Set before importing the app: config reads env at import time, and CI has no .env file.
 os.environ["SECRET_KEY"] = "test-secret-key-at-least-32-bytes-long"
+os.environ["BUCKET_NAME"] = "test-bucket"
 os.environ["ALGORITHM"] = "HS256"
 os.environ["SQLALCHEMY_DATABASE_URL"] = "sqlite://"
 os.environ["DATABASE_PROVIDER"] = "sql"

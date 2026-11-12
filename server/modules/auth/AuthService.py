@@ -8,11 +8,11 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt import PyJWTError
 from starlette import status
 
-from modules.auth.dto.create_user_request import CreateUserRequest
-from modules.auth.IAuthService import IAuthService
 from config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY
 from hr_core.models.user_model import User
 from hr_core.repository_interfaces.IUsersRepository import IUsersRepository
+from modules.auth.dto.create_user_request import CreateUserRequest
+from modules.auth.IAuthService import IAuthService
 
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 

@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from hr_core.models.video_verification_model import VideoVerification as VideoVerificationModel
@@ -17,6 +18,25 @@ class SQLVideoVerificationRepository(IVideoVerificationRepository):
         row = VideoVerification(**entity.model_dump(exclude={"id"}, exclude_none=True))
         self.db.add(row)
         self.db.commit()
+        self.db.refresh(row)
+        return VideoVerificationModel.model_validate(row)
+
+    def get_or_create(self, application_id: int, question_id: int) -> VideoVerificationModel:
+        query = select(VideoVerification).where(
+            VideoVerification.application_id == application_id,
+            VideoVerification.question_id == question_id,
+        )
+        row = self.db.scalar(query)
+        if row is None:
+            try:
+                row = VideoVerification(
+                    application_id=application_id, question_id=question_id, status="pending"
+                )
+                self.db.add(row)
+                self.db.commit()
+            except IntegrityError:
+                self.db.rollback()
+                row = self.db.scalar(query)
         self.db.refresh(row)
         return VideoVerificationModel.model_validate(row)
 

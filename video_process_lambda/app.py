@@ -1,11 +1,11 @@
 import logging
 import tempfile
 
-from config import settings
 from event_parser import parse_event_download_s3_file
 from save_to_db import save_to_db
 from transcribe_video import transcribe
 
+from config import settings
 from hr_core.s3.service import S3Service
 
 logger = logging.getLogger()

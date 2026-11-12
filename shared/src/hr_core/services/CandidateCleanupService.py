@@ -32,11 +32,12 @@ class CandidateCleanupService:
         self.bucket_name = bucket_name
 
     def purge(self, application_id: int) -> None:
-        resume = self.resumes.get_by_application(application_id)
-        keys = [video.s3_key for video in self.videos.list_by_application(application_id)]
-        if resume is not None:
-            keys.append(resume.s3_key)
-        self.s3.delete_objects(self.bucket_name, [key for key in keys if key])
+        keys = [
+            self.s3.get_video_key(video.id)
+            for video in self.videos.list_by_application(application_id)
+        ]
+        keys.append(self.s3.get_resume_key(application_id))
+        self.s3.delete_objects(self.bucket_name, keys)
 
         self.videos.delete_by_application(application_id)
         self.texts.delete_by_application(application_id)

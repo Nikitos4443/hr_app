@@ -4,12 +4,11 @@ from dotenv import load_dotenv
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from hr_core.constants.index import BUCKET_VIDEOS_PREFIX
 from hr_core.sql.session import create_session_factory
 from hr_core.sql.tables import Applications, Questions, Users, Vacancies, VideoVerification
 
 load_dotenv()
-
-S3_VIDEOS_PREFIX = "raw/videos/"
 
 TEST_USERNAME = "test_hr"
 # bcrypt hash of "test1234", so you can log in through the server as this user
@@ -117,8 +116,6 @@ def get_or_create_video_verification(
         )
         session.add(verification)
         session.flush()
-    if verification.s3_key is None:
-        verification.s3_key = f"{S3_VIDEOS_PREFIX}{verification.id}.mp4"
     return verification
 
 
@@ -153,7 +150,8 @@ def main() -> None:
         for application, question, verification in rows:
             print(
                 f"  id={verification.id:<4} status={verification.status:<10} "
-                f"{application.email:<26} q{question.order}  ->  {verification.s3_key}"
+                f"{application.email:<26} q{question.order}  ->  "
+                f"{BUCKET_VIDEOS_PREFIX}{verification.id}"
             )
 
 

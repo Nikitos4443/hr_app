@@ -1,8 +1,9 @@
+import logging
 import os
 from dataclasses import dataclass
-import logging
 
 from faster_whisper import WhisperModel
+
 from hr_core.config.parameters import load_parameters
 
 MODEL_DIR = os.getenv("WHISPER_MODEL_DIR", "/opt/whisper-model")
