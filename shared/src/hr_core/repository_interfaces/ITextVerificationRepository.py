@@ -8,4 +8,9 @@ class ITextVerificationRepository(ABC):
     def create(self, entity: TextVerification) -> TextVerification: ...
 
     @abstractmethod
+    def save_answer(
+        self, application_id: int, question_id: int, answer: str
+    ) -> TextVerification: ...
+
+    @abstractmethod
     def delete_by_application(self, application_id: int) -> None: ...
