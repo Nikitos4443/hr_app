@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
+
 from hr_core.config.parameters import load_parameters
 from hr_core.notifications.EmailNotificationChannel import EmailNotificationChannel
 from hr_core.notifications.INotificationChannel import INotificationChannel

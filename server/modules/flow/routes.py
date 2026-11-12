@@ -1,24 +1,25 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_utils.cbv import cbv
-from starlette import status
-
-from config import BUCKET_NAME
-from hr_core.s3.service import S3Service
 from ioc.index import (
     get_applications_service,
     get_resume_service,
     get_s3_service,
     get_video_service,
 )
-from modules.applications.IApplicationService import IApplicationService
-from modules.flow.services.IResumeService import IResumeService
-from modules.flow.services.IVideoService import IVideoService
+from starlette import status
+
+from config import BUCKET_NAME
+from hr_core.s3.service import S3Service
 from modules.applications.dto.create_application_dto import CreateApplicationDTO
+from modules.applications.IApplicationService import IApplicationService
 from modules.flow.dependencies import ActiveApplicationDep
 from modules.flow.dto.create_resume_verification_dto import CreateResumeVerificationDTO
 from modules.flow.errors import VideoFlowError
+from modules.flow.services.IResumeService import IResumeService
+from modules.flow.services.IVideoService import IVideoService
 
 router = APIRouter(prefix="/flow", tags=["flow"])
+
 
 @cbv(router)
 class FlowRouter:
@@ -28,10 +29,7 @@ class FlowRouter:
     video_service: IVideoService = Depends(get_video_service)
 
     @router.post("/resume-get-presigned-post-url", status_code=status.HTTP_201_CREATED)
-    async def get_resume_presigned_url_and_create_application(
-            self,
-            dto: CreateApplicationDTO
-    ):
+    async def get_resume_presigned_url_and_create_application(self, dto: CreateApplicationDTO):
         application = await self.applications_service.create_application(dto)
         s3_key = self.s3Service.get_resume_key(application.id)
 
@@ -46,11 +44,11 @@ class FlowRouter:
             await self.resume_service.create_resume_verification(
                 CreateResumeVerificationDTO(application_id=application.id, status="pending")
             )
-        except Exception:
+        except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to create resume verification",
-            )
+            ) from e
 
         return presigned_post
 
@@ -62,7 +60,6 @@ class FlowRouter:
             "status": application.status,
         }
 
-
     @router.post(
         "/screening/{token}/questions/{question_id}/video-upload-url",
         status_code=status.HTTP_201_CREATED,
@@ -73,7 +70,7 @@ class FlowRouter:
                 application, question_id
             )
         except VideoFlowError as e:
-            raise HTTPException(status_code=e.status_code, detail=e.detail)
+            raise HTTPException(status_code=e.status_code, detail=e.detail) from e
 
         s3_key = self.s3Service.get_video_key(verification.id)
         presigned_post = self.s3Service.create_video_presigned_post_url(BUCKET_NAME, s3_key)

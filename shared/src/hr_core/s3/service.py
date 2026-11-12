@@ -12,7 +12,8 @@ from hr_core.constants.index import (
     VIDEO_CONTENT_TYPE_PREFIX,
 )
 
-s3_client = boto3.client('s3')
+s3_client = boto3.client("s3")
+
 
 class S3Service:
     def create_presigned_post_url(
@@ -32,7 +33,7 @@ class S3Service:
                     ["content-length-range", 1, max_size_bytes],
                     ["eq", "$Content-Type", content_type],
                 ],
-                ExpiresIn=expiration
+                ExpiresIn=expiration,
             )
         except ClientError as e:
             logging.error(e)

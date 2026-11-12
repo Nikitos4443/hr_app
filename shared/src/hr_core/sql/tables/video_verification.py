@@ -6,7 +6,9 @@ from hr_core.sql.base import Base
 class VideoVerification(Base):
     __tablename__ = "video_verification"
     __table_args__ = (
-        UniqueConstraint("application_id", "question_id", name="uq_video_verification_application_question"),
+        UniqueConstraint(
+            "application_id", "question_id", name="uq_video_verification_application_question"
+        ),
     )
 
     id = Column(Integer, primary_key=True)

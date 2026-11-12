@@ -1,12 +1,12 @@
-from config import MIN_CANDIDATES, SCORE_THRESHOLD
 from db import SessionLocal
-from output_model import OutputModel
 from selection import pick_candidate_to_reject
 
+from config import MIN_CANDIDATES, SCORE_THRESHOLD
 from hr_core.sql.repositories.SQLApplicationsRepository import SQLApplicationsRepository
 from hr_core.sql.repositories.SQLResumeVerificationRepository import (
     SQLResumeVerificationRepository,
 )
+from output_model import OutputModel
 
 
 def save_to_db(application_id: int, vacancy_id: int, result: OutputModel) -> int | None:

@@ -1,10 +1,10 @@
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
+from ioc.index import ApplicationsServiceDep
 from starlette import status
 
 from hr_core.models.application_model import Application
-from ioc.index import ApplicationsServiceDep
 
 
 async def get_active_application(token: str, service: ApplicationsServiceDep) -> Application:
@@ -12,7 +12,9 @@ async def get_active_application(token: str, service: ApplicationsServiceDep) ->
     if application is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Application not found")
     if application.status == "rejected":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Application was rejected")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Application was rejected"
+        )
     return application
 
 

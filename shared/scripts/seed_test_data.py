@@ -150,7 +150,8 @@ def main() -> None:
         for application, question, verification in rows:
             print(
                 f"  id={verification.id:<4} status={verification.status:<10} "
-                f"{application.email:<26} q{question.order}  ->  {BUCKET_VIDEOS_PREFIX}{verification.id}"
+                f"{application.email:<26} q{question.order}  ->  "
+                f"{BUCKET_VIDEOS_PREFIX}{verification.id}"
             )
 
 
