@@ -27,15 +27,12 @@ def get_auth_service(repo: UsersRepoDep) -> IAuthService:
     return AuthService(repo=repo)
 
 
-
 def get_resume_service(repo: ResumeVerificationRepoDep) -> IResumeService:
     return ResumeService(repo=repo)
 
 
-
 def get_s3_service() -> S3Service:
     return S3Service()
-
 
 
 def get_applications_service(repo: ApplicationsRepoDep) -> IApplicationService:
@@ -51,6 +48,7 @@ def get_video_service(
     resumes: ResumeVerificationRepoDep,
 ) -> IVideoService:
     return VideoService(videos=videos, questions=questions, resumes=resumes)
+
 
 def get_text_service(
     texts: TextVerificationRepoDep,
