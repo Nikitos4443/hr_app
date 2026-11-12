@@ -2,7 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from ioc.index import AuthServiceDep
+from ioc.index import get_auth_service
+from modules.auth.IAuthService import IAuthService
 from fastapi_utils.cbv import cbv
 from starlette import status
 
@@ -13,7 +14,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @cbv(router)
 class AuthRouter:
-    auth_service: AuthServiceDep
+    auth_service: IAuthService = Depends(get_auth_service)
 
     @router.post("/", status_code=status.HTTP_201_CREATED, response_model=Token)
     async def create_user(

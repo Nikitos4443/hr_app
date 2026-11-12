@@ -1,10 +1,18 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi_utils.cbv import cbv
 from starlette import status
 
 from config import BUCKET_NAME
 from hr_core.s3.service import S3Service
-from ioc.index import S3ServiceDep, ResumeServiceDep, ApplicationsServiceDep, VideoServiceDep
+from ioc.index import (
+    get_applications_service,
+    get_resume_service,
+    get_s3_service,
+    get_video_service,
+)
+from modules.applications.IApplicationService import IApplicationService
+from modules.flow.services.IResumeService import IResumeService
+from modules.flow.services.IVideoService import IVideoService
 from modules.applications.dto.create_application_dto import CreateApplicationDTO
 from modules.flow.dependencies import ActiveApplicationDep
 from modules.flow.dto.create_resume_verification_dto import CreateResumeVerificationDTO
@@ -14,10 +22,10 @@ router = APIRouter(prefix="/flow", tags=["flow"])
 
 @cbv(router)
 class FlowRouter:
-    s3Service: S3ServiceDep
-    applications_service: ApplicationsServiceDep
-    resume_service: ResumeServiceDep
-    video_service: VideoServiceDep
+    s3Service: S3Service = Depends(get_s3_service)
+    applications_service: IApplicationService = Depends(get_applications_service)
+    resume_service: IResumeService = Depends(get_resume_service)
+    video_service: IVideoService = Depends(get_video_service)
 
     @router.post("/resume-get-presigned-post-url", status_code=status.HTTP_201_CREATED)
     async def get_resume_presigned_url_and_create_application(
