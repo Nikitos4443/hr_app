@@ -9,10 +9,10 @@ from hr_core.sql.repositories.SQLResumeVerificationRepository import (
 )
 
 
-def save_to_db(application_id: int, vacancy_id: int, s3_key: str, result: OutputModel) -> int | None:
+def save_to_db(application_id: int, vacancy_id: int, result: OutputModel) -> int | None:
     with SessionLocal() as session:
         resumes = SQLResumeVerificationRepository(db=session)
-        resumes.save_result(application_id, s3_key, result.score, result.model_dump())
+        resumes.save_result(application_id, result.score, result.model_dump())
 
         rejected_id = pick_candidate_to_reject(
             resumes.get_active_scores(vacancy_id), MIN_CANDIDATES, SCORE_THRESHOLD

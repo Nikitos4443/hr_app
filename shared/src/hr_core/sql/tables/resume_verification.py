@@ -11,7 +11,6 @@ class ResumeVerification(Base):
         Integer, ForeignKey("applications.id"), nullable=False, unique=True, index=True
     )
     status = Column(String, nullable=False, default="pending")
-    s3_key = Column(String, nullable=True)
     score = Column(Float, nullable=True)
     llm_review = Column(JSON, nullable=True)
     processed_at = Column(DateTime(timezone=True), nullable=True)

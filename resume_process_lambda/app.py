@@ -26,7 +26,7 @@ def index(event, context):
                 S3Service().delete_objects(settings.bucket_name, [s3_key])
                 continue
 
-            rejected_id = save_to_db(application_id, vacancy.id, s3_key, result)
+            rejected_id = save_to_db(application_id, vacancy.id, result)
             logger.info(
                 "Saved resume score %s for application %s, rejected %s",
                 result.score,

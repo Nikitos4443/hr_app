@@ -27,7 +27,7 @@ class SQLResumeVerificationRepository(IResumeVerificationRepository):
         return ResumeVerificationModel.model_validate(row)
 
     def save_result(
-        self, application_id: int, s3_key: str, score: float, llm_review: dict[str, Any]
+        self, application_id: int, score: float, llm_review: dict[str, Any]
     ) -> ResumeVerificationModel:
         row = self.db.scalar(
             select(ResumeVerification).where(ResumeVerification.application_id == application_id)
@@ -35,7 +35,6 @@ class SQLResumeVerificationRepository(IResumeVerificationRepository):
         if row is None:
             row = ResumeVerification(application_id=application_id)
             self.db.add(row)
-        row.s3_key = s3_key
         row.score = score
         row.llm_review = llm_review
         row.status = "done"
