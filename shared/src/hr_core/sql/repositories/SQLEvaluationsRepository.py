@@ -18,6 +18,15 @@ class SQLEvaluationsRepository(IEvaluationsRepository):
         self.db.refresh(row)
         return Evaluation.model_validate(row)
 
+    def replace_for_vacancy(self, vacancy_id: int, entities: list[Evaluation]) -> list[Evaluation]:
+        self.db.execute(delete(Evaluations).where(Evaluations.vacancy_id == vacancy_id))
+        rows = [Evaluations(**e.model_dump(exclude={"id"}, exclude_none=True)) for e in entities]
+        self.db.add_all(rows)
+        self.db.commit()
+        for row in rows:
+            self.db.refresh(row)
+        return [Evaluation.model_validate(row) for row in rows]
+
     def delete_by_application(self, application_id: int) -> None:
         self.db.execute(delete(Evaluations).where(Evaluations.application_id == application_id))
         self.db.commit()

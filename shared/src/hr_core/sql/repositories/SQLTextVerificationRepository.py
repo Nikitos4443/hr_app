@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from hr_core.models.text_verification_model import TextVerification as TextVerificationModel
 from hr_core.repository_interfaces.ITextVerificationRepository import ITextVerificationRepository
+from hr_core.sql.tables.applications import Applications
 from hr_core.sql.tables.text_verification import TextVerification
 
 
@@ -46,6 +47,18 @@ class SQLTextVerificationRepository(ITextVerificationRepository):
             self.db.commit()
         self.db.refresh(row)
         return TextVerificationModel.model_validate(row)
+
+    def list_done_by_vacancy(self, vacancy_id: int) -> list[TextVerificationModel]:
+        rows = self.db.scalars(
+            select(TextVerification)
+            .join(Applications, Applications.id == TextVerification.application_id)
+            .where(
+                Applications.vacancy_id == vacancy_id,
+                Applications.status != "rejected",
+                TextVerification.status == "done",
+            )
+        )
+        return [TextVerificationModel.model_validate(row) for row in rows]
 
     def delete_by_application(self, application_id: int) -> None:
         self.db.execute(

@@ -9,3 +9,6 @@ class IVacanciesRepository(ABC):
 
     @abstractmethod
     def get_by_id(self, vacancy_id: int) -> Vacancy | None: ...
+
+    @abstractmethod
+    def update_selection_status(self, vacancy_id: int, status: str) -> None: ...

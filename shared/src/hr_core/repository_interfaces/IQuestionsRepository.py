@@ -9,3 +9,6 @@ class IQuestionsRepository(ABC):
 
     @abstractmethod
     def get_by_id(self, question_id: int) -> Question | None: ...
+
+    @abstractmethod
+    def list_by_vacancy(self, vacancy_id: int) -> list[Question]: ...

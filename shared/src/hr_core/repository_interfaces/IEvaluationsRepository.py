@@ -8,4 +8,9 @@ class IEvaluationsRepository(ABC):
     def create(self, entity: Evaluation) -> Evaluation: ...
 
     @abstractmethod
+    def replace_for_vacancy(
+        self, vacancy_id: int, entities: list[Evaluation]
+    ) -> list[Evaluation]: ...
+
+    @abstractmethod
     def delete_by_application(self, application_id: int) -> None: ...

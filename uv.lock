@@ -160,6 +160,22 @@ wheels = [
 name = "analyzer-lambda"
 version = "0.1.0"
 source = { virtual = "analyzer_lambda" }
+dependencies = [
+    { name = "hr-core" },
+    { name = "langchain" },
+    { name = "langchain-google-genai" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "hr-core", editable = "shared" },
+    { name = "langchain", specifier = ">=1.4.7" },
+    { name = "langchain-google-genai", specifier = ">=4.4.2" },
+    { name = "pydantic", specifier = ">=2.14.1" },
+    { name = "python-dotenv", specifier = ">=1.2.4" },
+]
 
 [[package]]
 name = "annotated-doc"
