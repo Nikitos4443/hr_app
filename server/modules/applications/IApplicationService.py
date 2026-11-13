@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
-from hr_core.models.application_model import Application
 from modules.applications.dto.create_application_dto import CreateApplicationDTO
+
+from hr_core.models.application_model import Application
 
 
 class IApplicationService(ABC):

@@ -10,4 +10,7 @@ def pick_candidate_to_reject(
     if not below_threshold:
         return None
 
-    return min(below_threshold, key=lambda application_id: (below_threshold[application_id], application_id))
+    return min(
+        below_threshold,
+        key=lambda application_id: (below_threshold[application_id], application_id),
+    )

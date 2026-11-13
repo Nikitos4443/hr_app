@@ -1,8 +1,6 @@
-from pydantic import EmailStr, Field
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, EmailStr
 
 
 class CreateApplicationDTO(BaseModel):
     vacancy_id: int
     email: EmailStr
-

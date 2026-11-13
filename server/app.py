@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from modules.ai_assistant.routes import sio
 from modules.auth import routes as auth_routes
 from modules.flow import routes as flow_routes
+
 from database.init_db import init_db
 import socketio
 init_db()

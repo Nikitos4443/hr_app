@@ -1,4 +1,7 @@
-from sqlalchemy import delete
+from datetime import UTC, datetime
+
+from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from hr_core.models.text_verification_model import TextVerification as TextVerificationModel
@@ -15,6 +18,32 @@ class SQLTextVerificationRepository(ITextVerificationRepository):
         row = TextVerification(**entity.model_dump(exclude={"id"}, exclude_none=True))
         self.db.add(row)
         self.db.commit()
+        self.db.refresh(row)
+        return TextVerificationModel.model_validate(row)
+
+    def save_answer(
+        self, application_id: int, question_id: int, answer: str
+    ) -> TextVerificationModel:
+        query = select(TextVerification).where(
+            TextVerification.application_id == application_id,
+            TextVerification.question_id == question_id,
+        )
+        row = self.db.scalar(query)
+        if row is None:
+            row = TextVerification(application_id=application_id, question_id=question_id)
+            self.db.add(row)
+        row.answer = answer
+        row.status = "done"
+        row.processed_at = datetime.now(UTC)
+        try:
+            self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
+            row = self.db.scalar(query)
+            row.answer = answer
+            row.status = "done"
+            row.processed_at = datetime.now(UTC)
+            self.db.commit()
         self.db.refresh(row)
         return TextVerificationModel.model_validate(row)
 

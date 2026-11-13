@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
-from fastapi import UploadFile
+from modules.flow.dto.create_resume_verification_dto import CreateResumeVerificationDTO
+
 
 class IResumeService(ABC):
     @abstractmethod
-    async def load_resume(self, file: UploadFile): ...
+    async def create_resume_verification(self, dto: CreateResumeVerificationDTO): ...

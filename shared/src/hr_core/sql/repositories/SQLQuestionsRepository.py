@@ -16,3 +16,7 @@ class SQLQuestionsRepository(IQuestionsRepository):
         self.db.commit()
         self.db.refresh(row)
         return Question.model_validate(row)
+
+    def get_by_id(self, question_id: int) -> Question | None:
+        row = self.db.get(Questions, question_id)
+        return None if row is None else Question.model_validate(row)

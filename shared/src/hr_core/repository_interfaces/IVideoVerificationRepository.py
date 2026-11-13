@@ -8,6 +8,9 @@ class IVideoVerificationRepository(ABC):
     def create(self, entity: VideoVerification) -> VideoVerification: ...
 
     @abstractmethod
+    def get_or_create(self, application_id: int, question_id: int) -> VideoVerification: ...
+
+    @abstractmethod
     def save_transcription(
         self, verification_id: int, transcription: str
     ) -> VideoVerification | None: ...

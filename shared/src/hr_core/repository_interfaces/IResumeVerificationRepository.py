@@ -10,7 +10,7 @@ class IResumeVerificationRepository(ABC):
 
     @abstractmethod
     def save_result(
-        self, application_id: int, s3_key: str, score: float, llm_review: dict[str, Any]
+        self, application_id: int, score: float, llm_review: dict[str, Any]
     ) -> ResumeVerification: ...
 
     @abstractmethod
