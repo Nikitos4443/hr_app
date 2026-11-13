@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from hr_core.models.question_model import Question
@@ -20,3 +21,9 @@ class SQLQuestionsRepository(IQuestionsRepository):
     def get_by_id(self, question_id: int) -> Question | None:
         row = self.db.get(Questions, question_id)
         return None if row is None else Question.model_validate(row)
+
+    def list_by_vacancy(self, vacancy_id: int) -> list[Question]:
+        rows = self.db.scalars(
+            select(Questions).where(Questions.vacancy_id == vacancy_id).order_by(Questions.order)
+        )
+        return [Question.model_validate(row) for row in rows]
