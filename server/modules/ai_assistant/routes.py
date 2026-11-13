@@ -2,7 +2,7 @@ import eventlet
 import socketio
 from fastapi import APIRouter 
 from fastapi_utils.cbv import cbv
-from ai_assistant_service import AIAssitant
+
 from ioc.db_deps import get_vacancies_repository
 from database.init_db import get_sql_db
 sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")

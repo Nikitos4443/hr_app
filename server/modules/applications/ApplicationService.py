@@ -1,8 +1,7 @@
-from modules.applications.dto.create_application_dto import CreateApplicationDTO
-from modules.applications.IApplicationService import IApplicationService
-
 from hr_core.models.application_model import Application
 from hr_core.repository_interfaces.IApplicationsRepository import IApplicationsRepository
+from modules.applications.IApplicationService import IApplicationService
+from modules.applications.dto.create_application_dto import CreateApplicationDTO
 
 
 class ApplicationsService(IApplicationService):
