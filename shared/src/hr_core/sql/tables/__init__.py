@@ -1,5 +1,6 @@
 # Import every table so Base.metadata knows about all of them before create_all().
 from hr_core.sql.tables.applications import Applications
+from hr_core.sql.tables.companies import Companies
 from hr_core.sql.tables.evaluations import Evaluations
 from hr_core.sql.tables.questions import Questions
 from hr_core.sql.tables.resume_verification import ResumeVerification
@@ -10,6 +11,7 @@ from hr_core.sql.tables.video_verification import VideoVerification
 
 __all__ = [
     "Applications",
+    "Companies",
     "Evaluations",
     "Questions",
     "ResumeVerification",
