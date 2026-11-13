@@ -1,7 +1,7 @@
 """add companies table and link vacancies to it
 
 Revision ID: d9a3b6e1f2c5
-Revises: c4d8e1a7f3b2
+Revises: f7d2b4e0a6c1
 Create Date: 2026-11-12 12:00:00.000000
 
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 revision: str = 'd9a3b6e1f2c5'
-down_revision: Union[str, Sequence[str], None] = 'c4d8e1a7f3b2'
+down_revision: Union[str, Sequence[str], None] = 'f7d2b4e0a6c1'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

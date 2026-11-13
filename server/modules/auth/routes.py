@@ -8,13 +8,13 @@ from starlette import status
 
 from modules.auth.dto.create_user_request import CreateUserRequest
 from modules.auth.dto.token import Token
-
+from ioc.index import get_auth_service
+from modules.auth.IAuthService import IAuthService
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 @cbv(router)
 class AuthRouter:
-    auth_service: AuthServiceDep
-
+    auth_service: IAuthService = Depends(get_auth_service)
     @router.post("/", status_code=status.HTTP_201_CREATED, response_model=Token)
     async def create_user(
         self,
