@@ -34,3 +34,4 @@ def get_applications_service(repo: ApplicationsRepoDep) -> IApplicationService:
     return ApplicationsService(repo)
 
 ApplicationsServiceDep = Annotated[IApplicationService, Depends(get_applications_service)]
+

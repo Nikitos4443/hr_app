@@ -126,3 +126,5 @@ def get_text_verification_repository(sql_db: SqlDbDep) -> ITextVerificationRepos
 TextVerificationRepoDep = Annotated[
     ITextVerificationRepository, Depends(get_text_verification_repository)
 ]
+
+
