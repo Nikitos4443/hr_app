@@ -16,11 +16,6 @@ import {
   SSM_ANALYZER_SCHEDULER_ROLE_ARN,
 } from '../constants';
 
-/**
- * Single EC2 instance hosting the FastAPI backend (systemd) and the built Vue client (Caddy).
- * Caddy config lives in deploy/Caddyfile. Code is deployed by CI: release tarball to S3,
- * then deploy/deploy-main-server.sh runs on the instance through SSM.
- */
 export class MainServerStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: IBucketNameProps) {
     super(scope, id, props);
