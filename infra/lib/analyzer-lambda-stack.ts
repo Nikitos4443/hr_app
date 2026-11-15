@@ -5,6 +5,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import {Duration} from "aws-cdk-lib";
 import {IBucketNameProps} from "../interfaces";
 import { pythonLambdaCode } from "./python-lambda-code";
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 export class AnalyzerLambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: IBucketNameProps) {
@@ -18,6 +19,17 @@ export class AnalyzerLambdaStack extends cdk.Stack {
       timeout: lambdaTimeout,
       code: pythonLambdaCode('analyzer_lambda', 'analyzer-lambda'),
     });
+
+    const databaseUrlParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'DatabaseUrl', {
+      parameterName: 'DATABASE_URL',
+    });
+
+    const geminiKeyParameter = ssm.StringParameter.fromSecureStringParameterAttributes(this, 'GeminiKey', {
+      parameterName: 'GOOGLE_API_KEY',
+    });
+
+    databaseUrlParameter.grantRead(fn);
+    geminiKeyParameter.grantRead(fn);
 
     const schedulerRole = new iam.Role(this, 'EventBridgeSchedulerRole', {
       assumedBy: new iam.ServicePrincipal('scheduler.amazonaws.com'),

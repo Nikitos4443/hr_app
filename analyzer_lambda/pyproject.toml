@@ -1,10 +1,19 @@
 [project]
 name = "analyzer-lambda"
 version = "0.1.0"
-description = "Add your description here"
+description = "Ranks candidates of a vacancy with an LLM (invoked by EventBridge Scheduler)"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "langchain>=1.4.7",
+    "langchain-google-genai>=4.4.2",
+    "pydantic>=2.14.1",
+    "python-dotenv>=1.2.4",
+    "hr-core",
+]
 
 [tool.uv]
 package = false
+
+[tool.uv.sources]
+hr-core = { workspace = true }

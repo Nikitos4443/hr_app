@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from hr_core.models.video_verification_model import VideoVerification as VideoVerificationModel
 from hr_core.repository_interfaces.IVideoVerificationRepository import IVideoVerificationRepository
+from hr_core.sql.tables.applications import Applications
 from hr_core.sql.tables.video_verification import VideoVerification
 
 
@@ -56,6 +57,18 @@ class SQLVideoVerificationRepository(IVideoVerificationRepository):
     def list_by_application(self, application_id: int) -> list[VideoVerificationModel]:
         rows = self.db.scalars(
             select(VideoVerification).where(VideoVerification.application_id == application_id)
+        )
+        return [VideoVerificationModel.model_validate(row) for row in rows]
+
+    def list_done_by_vacancy(self, vacancy_id: int) -> list[VideoVerificationModel]:
+        rows = self.db.scalars(
+            select(VideoVerification)
+            .join(Applications, Applications.id == VideoVerification.application_id)
+            .where(
+                Applications.vacancy_id == vacancy_id,
+                Applications.status != "rejected",
+                VideoVerification.status == "done",
+            )
         )
         return [VideoVerificationModel.model_validate(row) for row in rows]
 

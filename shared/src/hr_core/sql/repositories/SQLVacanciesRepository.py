@@ -20,3 +20,10 @@ class SQLVacanciesRepository(IVacanciesRepository):
     def get_by_id(self, vacancy_id: int) -> Vacancy | None:
         row = self.db.get(Vacancies, vacancy_id)
         return None if row is None else Vacancy.model_validate(row)
+
+    def update_selection_status(self, vacancy_id: int, status: str) -> None:
+        row = self.db.get(Vacancies, vacancy_id)
+        if row is None:
+            raise LookupError(f"vacancy {vacancy_id} not found")
+        row.selection_status = status
+        self.db.commit()

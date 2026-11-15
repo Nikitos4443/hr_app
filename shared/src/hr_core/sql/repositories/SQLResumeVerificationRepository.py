@@ -66,3 +66,15 @@ class SQLResumeVerificationRepository(IResumeVerificationRepository):
             delete(ResumeVerification).where(ResumeVerification.application_id == application_id)
         )
         self.db.commit()
+
+    def list_done_by_vacancy(self, vacancy_id: int) -> list[ResumeVerificationModel]:
+        rows = self.db.scalars(
+            select(ResumeVerification)
+            .join(Applications, Applications.id == ResumeVerification.application_id)
+            .where(
+                Applications.vacancy_id == vacancy_id,
+                Applications.status != "rejected",
+                ResumeVerification.status == "done",
+            )
+        )
+        return [ResumeVerificationModel.model_validate(row) for row in rows]
