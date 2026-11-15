@@ -55,6 +55,7 @@ class SQLUsersRepository(IUsersRepository):
         row.username = entity.username
         row.password = entity.password
         row.role = UserRole(entity.role).value
+        row.company_id = entity.company_id
         self.db.commit()
         self.db.refresh(row)
         return _to_model(row)

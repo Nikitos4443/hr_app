@@ -35,6 +35,17 @@ class UserService(IUserService):
             )
         )
 
+    def get_by_id(self, user_id: int) -> User | None:
+        return self.repo.get_by_id(user_id)
+
+    def list_company_members(self, company_id: int) -> list[User]:
+        return self.repo.list_by_company(company_id)
+
+    def set_company(self, user_id: int, company_id: int | None) -> User:
+        user = self.repo.get_by_id(user_id)
+        user.company_id = company_id
+        return self.repo.update_user(user)
+
     def get_by_username(self, username: str) -> User | None:
         return self.repo.query_user(username)
 

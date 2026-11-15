@@ -16,11 +16,20 @@ os.environ["LLM_MODEL"] = "google_genai:gemini-2.5-flash"
 
 import pytest
 from fastapi.testclient import TestClient
+from guard_core.handlers.ratelimit_handler import RateLimitManager
 from sqlalchemy.pool import StaticPool
 
 from app import fastapi_app as app
 from database.init_db import get_sql_db
 from hr_core.sql.session import create_all_tables, create_session_factory
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limits():
+    """The in-memory rate limiter is process-wide; start every test with an empty window."""
+    yield
+    if RateLimitManager._instance is not None:
+        RateLimitManager._instance.request_timestamps.clear()
 
 
 @pytest.fixture

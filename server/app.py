@@ -4,6 +4,7 @@ from guard import SecurityMiddleware
 from modules.ai_assistant.routes import sio
 from modules.auth import routes as auth_routes
 from modules.auth.guards import guard_deco
+from modules.companies import routes as companies_routes
 from modules.flow import routes as flow_routes
 from modules.users import routes as users_routes
 
@@ -18,4 +19,5 @@ fastapi_app.state.guard_decorator = guard_deco
 fastapi_app.include_router(auth_routes.router)
 fastapi_app.include_router(flow_routes.router)
 fastapi_app.include_router(users_routes.router)
+fastapi_app.include_router(companies_routes.router)
 app = socketio.ASGIApp(sio, other_asgi_app=fastapi_app)

@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import Depends
 from ioc.db_deps import (
     ApplicationsRepoDep,
+    CompaniesRepoDep,
     QuestionsRepoDep,
     ResumeVerificationRepoDep,
     TextVerificationRepoDep,
@@ -13,6 +14,8 @@ from modules.applications.ApplicationService import ApplicationsService
 from modules.applications.IApplicationService import IApplicationService
 from modules.auth.AuthService import AuthService
 from modules.auth.IAuthService import IAuthService
+from modules.companies.CompanyService import CompanyService
+from modules.companies.ICompanyService import ICompanyService
 from modules.flow.services.IResumeService import IResumeService
 from modules.flow.services.ITextService import ITextService
 from modules.flow.services.IVideoService import IVideoService
@@ -30,6 +33,12 @@ def get_users_service(repo: UsersRepoDep) -> IUserService:
 
 
 UsersServiceDep = Annotated[IUserService, Depends(get_users_service)]
+
+
+def get_companies_service(
+    repo: CompaniesRepoDep, users_service: UsersServiceDep
+) -> ICompanyService:
+    return CompanyService(repo=repo, users_service=users_service)
 
 
 def get_auth_service(users_service: UsersServiceDep) -> IAuthService:

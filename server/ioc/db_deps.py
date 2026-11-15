@@ -70,7 +70,7 @@ def get_vacancies_repository(sql_db: SqlDbDep) -> IVacanciesRepository:
 VacanciesRepoDep = Annotated[IVacanciesRepository, Depends(get_vacancies_repository)]
 
 
-def get_companies_repository(sql_db: SqlDbDep) -> IVacanciesRepository:
+def get_companies_repository(sql_db: SqlDbDep) -> ICompaniesRepository:
     if DATABASE_PROVIDER == "sql":
         return SQLCompaniesRepository(db=sql_db)
     raise _unsupported_provider("CompaniesRepository")
