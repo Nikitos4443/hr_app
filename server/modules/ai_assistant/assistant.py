@@ -1,23 +1,20 @@
-
+from abc import ABC
 
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import SystemMessage
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
+from modules.ai_assistant.chat_context import ChatContext
+from modules.ai_assistant.format import *
+from modules.ai_assistant.intent import IntentClassifier
+from modules.ai_assistant.prompts import *
+from modules.ai_assistant.state import State
 
 from config import settings
 from hr_core.models.company_model import Company
 from hr_core.models.vacancy_model import Vacancy
-from modules.ai_assistant.intent import IntentClassifier
-from modules.ai_assistant.state import State
-from modules.ai_assistant.prompts import *
-from modules.ai_assistant.format import *
-
-from modules.ai_assistant.chat_context import ChatContext
-
-from abc import ABC
-from hr_core.repository_interfaces.IVacanciesRepository import IVacanciesRepository
 from hr_core.repository_interfaces.ICompaniesRepository import ICompaniesRepository
+from hr_core.repository_interfaces.IVacanciesRepository import IVacanciesRepository
 
 
 class IAIAssitant(ABC):
@@ -25,6 +22,7 @@ class IAIAssitant(ABC):
 
 
 CLASSIFIER_HISTORY = 6
+
 
 class AIAssitant(IAIAssitant):
     def __init__(self, llm=None, checkpointer=None):
@@ -37,7 +35,7 @@ class AIAssitant(IAIAssitant):
         companies: ICompaniesRepository,
         vacancy_id: int,
     ) -> ChatContext | None:
-        
+
         vacancy = vacancies.get_by_id(vacancy_id)
         if vacancy is None:
             print("No vacancy found")
@@ -52,7 +50,6 @@ class AIAssitant(IAIAssitant):
         )
         return {"message_intent": result.msg_intent}
 
-
     async def prompt_llm_vacancy(self, state: State):
         system = VACANCY_PROMPT.format(
             rules=BASE_RULES,
@@ -61,7 +58,6 @@ class AIAssitant(IAIAssitant):
         )
         response = await self.llm.ainvoke([SystemMessage(system), *state["messages"]])
         return {"messages": [response]}
-
 
     async def prompt_llm_company(self, state: State):
         system = COMPANY_PROMPT.format(
@@ -72,7 +68,6 @@ class AIAssitant(IAIAssitant):
         response = await self.llm.ainvoke([SystemMessage(system), *state["messages"]])
         return {"messages": [response]}
 
-
     async def prompt_llm_unrelated(self, state: State):
         vacancy = state.get("vacancy")
         system = UNRELATED_PROMPT.format(
@@ -81,7 +76,6 @@ class AIAssitant(IAIAssitant):
         )
         response = await self.llm.ainvoke([SystemMessage(system), state["messages"][-1]])
         return {"messages": [response]}
-
 
     async def prompt_llm_helper(self, state: State):
         vacancy = state.get("vacancy")
@@ -92,15 +86,12 @@ class AIAssitant(IAIAssitant):
         response = await self.llm.ainvoke([SystemMessage(system), state["messages"][-1]])
         return {"messages": [response]}
 
-
     def route_by_intent(self, state: State) -> str:
         return {
             "Vacancy": "vacancy_agent",
             "Company": "company_agent",
             "Helper": "helper",
         }.get(state.get("message_intent"), "unrelated")
-
-
 
     def build_graph(self, checkpointer=None):
         builder = StateGraph(State)
@@ -120,11 +111,11 @@ class AIAssitant(IAIAssitant):
         builder.add_edge("company_agent", END)
         builder.add_edge("helper", END)
         builder.add_edge("unrelated", END)
-        
 
         return builder.compile(checkpointer=checkpointer or InMemorySaver())
 
-    async def ask(self, 
+    async def ask(
+        self,
         thread_id: str,
         text: str,
         vacancy: Vacancy | None,
@@ -140,6 +131,3 @@ class AIAssitant(IAIAssitant):
             config={"configurable": {"thread_id": thread_id}},
         )
         return result["messages"][-1].text
-
-
-   

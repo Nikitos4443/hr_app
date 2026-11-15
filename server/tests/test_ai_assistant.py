@@ -1,10 +1,11 @@
 import asyncio
-import pytest
-from hr_core.models.vacancy_model import Vacancy
-from langchain_core.messages import AIMessage
 
+import pytest
+from langchain_core.messages import AIMessage
 from modules.ai_assistant.assistant import AIAssitant
 from modules.ai_assistant.intent import IntentClassifier
+
+from hr_core.models.vacancy_model import Vacancy
 
 
 class FakeLLM:
@@ -82,7 +83,9 @@ def test_history_is_kept_per_thread():
     ask(assistant, "інший чат", thread_id="b")
 
     def history(thread_id):
-        return assistant.graph.get_state({"configurable": {"thread_id": thread_id}}).values["messages"]
+        return assistant.graph.get_state({"configurable": {"thread_id": thread_id}}).values[
+            "messages"
+        ]
 
     assert len(history("a")) == 4  # 2 user + 2 bot
     assert len(history("b")) == 2

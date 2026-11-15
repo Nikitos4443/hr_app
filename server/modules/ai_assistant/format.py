@@ -1,6 +1,7 @@
 from hr_core.models.company_model import Company
 from hr_core.models.vacancy_model import Vacancy
 
+
 def _format_salary(v: Vacancy) -> str | None:
     if v.salary_min is None and v.salary_max is None:
         return None
