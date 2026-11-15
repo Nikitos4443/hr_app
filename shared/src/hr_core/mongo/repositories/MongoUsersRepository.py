@@ -14,3 +14,15 @@ class MongoUsersRepository(IUsersRepository):
 
     def query_user(self, username):
         pass
+
+    def get_by_id(self, user_id):
+        pass
+
+    def list_by_company(self, company_id):
+        pass
+
+    def update_user(self, entity: User):
+        pass
+
+    def delete_user(self, user_id):
+        pass

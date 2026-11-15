@@ -1,15 +1,19 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import * as fs from 'fs';
-import * as path from 'path';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as fs from 'fs';
+import * as path from 'path';
 import { IBucketNameProps } from '../interfaces';
 import {
+  ANALYZER_SCHEDULE_NAME_PREFIX,
+  ANALYZER_SCHEDULER_ROLE_NAME,
+  CADDY_VERSION,
   MAIN_SERVER_APP_DIR,
   MAIN_SERVER_ENV_PARAMETER,
-  CADDY_VERSION,
+  SSM_ANALYZER_LAMBDA_ARN,
+  SSM_ANALYZER_SCHEDULER_ROLE_ARN,
 } from '../constants';
 
 /**
@@ -60,6 +64,43 @@ export class MainServerStack extends cdk.Stack {
       `export APP_DIR=${MAIN_SERVER_APP_DIR} CADDY_VERSION=${CADDY_VERSION}`,
       fs.readFileSync(path.join(__dirname, '../userdata/main-server.sh'), 'utf-8'),
     );
+
+    // Parameters the server loads on startup (PARAMETER_NAMES in server/config.py) when they are not
+    // set in the environment. The two analyzer ARNs are published by AnalyzerLambdaStack (deploy it first).
+    const serverParameterNames = [
+      'DATABASE_URL',
+      'GOOGLE_API_KEY',
+      'SMTP_USER',
+      'SMTP_PASSWORD',
+      'BUCKET_NAME',
+      'FRONTEND_URL',
+      'LLM_MODEL',
+      SSM_ANALYZER_LAMBDA_ARN,
+      SSM_ANALYZER_SCHEDULER_ROLE_ARN,
+    ];
+    role.addToPolicy(new iam.PolicyStatement({
+      actions: ['ssm:GetParameters', 'ssm:GetParameter'],
+      resources: serverParameterNames.map((name) => this.formatArn({
+        service: 'ssm',
+        resource: 'parameter',
+        resourceName: name,
+      })),
+    }));
+
+    // The server schedules analyzer_lambda runs through EventBridge Scheduler.
+    role.addToPolicy(new iam.PolicyStatement({
+      actions: ['scheduler:CreateSchedule', 'scheduler:UpdateSchedule', 'scheduler:DeleteSchedule'],
+      resources: [
+        `arn:aws:scheduler:${this.region}:${this.account}:schedule/default/${ANALYZER_SCHEDULE_NAME_PREFIX}*`,
+      ],
+    }));
+
+    // Creating a schedule hands the scheduler role to the service, which needs PassRole.
+    role.addToPolicy(new iam.PolicyStatement({
+      actions: ['iam:PassRole'],
+      resources: [`arn:aws:iam::${this.account}:role/${ANALYZER_SCHEDULER_ROLE_NAME}`],
+      conditions: { StringEquals: { 'iam:PassedToService': 'scheduler.amazonaws.com' } },
+    }));
 
     const instance = new ec2.Instance(this, 'MainServerInstance', {
       vpc,
