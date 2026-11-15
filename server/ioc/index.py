@@ -8,6 +8,7 @@ from ioc.db_deps import (
     ResumeVerificationRepoDep,
     TextVerificationRepoDep,
     UsersRepoDep,
+    VacanciesRepoDep,
     VideoVerificationRepoDep,
 )
 from modules.applications.ApplicationService import ApplicationsService
@@ -24,6 +25,8 @@ from modules.flow.services.TextService import TextService
 from modules.flow.services.VideoService import VideoService
 from modules.users.IUserService import IUserService
 from modules.users.UserService import UserService
+from modules.vacancies.IVacancyService import IVacancyService
+from modules.vacancies.VacancyService import VacancyService
 
 from hr_core.s3.service import S3Service
 
@@ -39,6 +42,19 @@ def get_companies_service(
     repo: CompaniesRepoDep, users_service: UsersServiceDep
 ) -> ICompanyService:
     return CompanyService(repo=repo, users_service=users_service)
+
+
+CompaniesServiceDep = Annotated[ICompanyService, Depends(get_companies_service)]
+
+
+def get_vacancies_service(
+    repo: VacanciesRepoDep,
+    users_service: UsersServiceDep,
+    companies_service: CompaniesServiceDep,
+) -> IVacancyService:
+    return VacancyService(
+        repo=repo, users_service=users_service, companies_service=companies_service
+    )
 
 
 def get_auth_service(users_service: UsersServiceDep) -> IAuthService:

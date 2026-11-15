@@ -1,0 +1,61 @@
+from datetime import datetime
+from typing import Literal, Self
+
+from pydantic import BaseModel, Field, field_validator, model_validator
+
+
+def _validate_title(value: str) -> str:
+    value = value.strip()
+    if not value:
+        raise ValueError("Назва вакансії не може бути порожньою")
+    return value
+
+
+class _SalaryRangeMixin(BaseModel):
+    salary_min: int | None = Field(default=None, ge=0)
+    salary_max: int | None = Field(default=None, ge=0)
+
+    @model_validator(mode="after")
+    def check_salary_range(self) -> Self:
+        if (
+            self.salary_min is not None
+            and self.salary_max is not None
+            and self.salary_min > self.salary_max
+        ):
+            raise ValueError("salary_min не може бути більшим за salary_max")
+        return self
+
+
+class CreateVacancyDTO(_SalaryRangeMixin):
+    title: str
+    location: str | None = None
+    employment_type: str | None = None
+    experience_years_min: int | None = Field(default=None, ge=0)
+    description: str | None = None
+    responsibilities: list[str] = Field(default_factory=list)
+    requirements: list[str] = Field(default_factory=list)
+    nice_to_have: list[str] = Field(default_factory=list)
+    salary_currency: str | None = None
+    status: Literal["open", "closed"] = "open"
+    deadline_at: datetime | None = None
+
+    _check_title = field_validator("title")(_validate_title)
+
+
+class UpdateVacancyDTO(_SalaryRangeMixin):
+    title: str | None = None
+    location: str | None = None
+    employment_type: str | None = None
+    experience_years_min: int | None = Field(default=None, ge=0)
+    description: str | None = None
+    responsibilities: list[str] | None = None
+    requirements: list[str] | None = None
+    nice_to_have: list[str] | None = None
+    salary_currency: str | None = None
+    status: Literal["open", "closed"] | None = None
+    deadline_at: datetime | None = None
+
+    @field_validator("title")
+    @classmethod
+    def check_title(cls, value: str | None) -> str | None:
+        return None if value is None else _validate_title(value)

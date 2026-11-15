@@ -18,6 +18,9 @@ class CompanyService(ICompanyService):
         self.repo = repo
         self.users_service = users_service
 
+    def get_by_id(self, company_id: int) -> Company | None:
+        return self.repo.get_by_id(company_id)
+
     def create_company(self, actor: AuthPrincipal, dto: CreateCompanyDTO) -> Company:
         admin = self._load_actor(actor)
         if admin.company_id is not None:
