@@ -21,7 +21,6 @@ from config import settings
 from hr_core.models.company_model import Company
 from hr_core.models.vacancy_model import Vacancy
 from hr_core.repository_interfaces.ICompaniesRepository import ICompaniesRepository
-from hr_core.repository_interfaces.ICompaniesRepository import ICompaniesRepository
 from hr_core.repository_interfaces.IVacanciesRepository import IVacanciesRepository
 
 
@@ -39,7 +38,6 @@ class IAIAssitant(ABC):
 CLASSIFIER_HISTORY = 6
 
 
-
 class AIAssitant(IAIAssitant):
     def __init__(self, llm=None, checkpointer=None):
         self.llm = llm or init_chat_model(settings.llm_model)
@@ -51,7 +49,6 @@ class AIAssitant(IAIAssitant):
         companies: ICompaniesRepository,
         vacancy_id: int,
     ) -> ChatContext | None:
-
 
         vacancy = vacancies.get_by_id(vacancy_id)
         if vacancy is None:
@@ -133,8 +130,6 @@ class AIAssitant(IAIAssitant):
 
     async def ask(
         self,
-    async def ask(
-        self,
         thread_id: str,
         text: str,
         vacancy: Vacancy | None,
@@ -150,4 +145,3 @@ class AIAssitant(IAIAssitant):
             config={"configurable": {"thread_id": thread_id}},
         )
         return result["messages"][-1].text
-
