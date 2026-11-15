@@ -8,11 +8,11 @@ Client -> server:
 import asyncio
 
 import socketio
-
-from database import init_db as db
 from ioc.db_deps import get_companies_repository, get_vacancies_repository
 from modules.ai_assistant.assistant import AIAssitant
 from modules.ai_assistant.chat_context import ChatContext
+
+from database import init_db as db
 
 sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
 
@@ -38,12 +38,12 @@ async def connect(sid, environ, auth=None):
 async def chat_start(sid, data):
     try:
         vacancy_id = int(data["vacancy_id"])
-    except (KeyError, TypeError, ValueError):
+    except KeyError, TypeError, ValueError:
         await sio.emit("chat_error", {"error": "vacancy_id is required"}, to=sid)
         return
 
     ctx = await asyncio.to_thread(load_context, vacancy_id)
-    print(f"CTX: {ctx}" )
+    print(f"CTX: {ctx}")
     if ctx is None:
         await sio.emit("chat_error", {"error": "Vacancy not found"}, to=sid)
         return

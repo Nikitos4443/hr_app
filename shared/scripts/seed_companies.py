@@ -13,7 +13,6 @@ from sqlalchemy.orm import Session
 from hr_core.sql.session import create_session_factory
 from hr_core.sql.tables import Companies, Users, Vacancies
 
-
 HR_USERNAME = "test_hr"
 # bcrypt hash of "test1234"
 HR_PASSWORD_HASH = "$2b$12$rZIdS7Mgo6zmLyTl6y.PFOBfBEbAXgC3X37x9I5eOjlG1RyfTz3pq"

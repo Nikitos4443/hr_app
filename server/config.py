@@ -1,6 +1,9 @@
 import os
+from dataclasses import dataclass
 
 from dotenv import load_dotenv
+
+from hr_core.config.parameters import load_parameters
 
 load_dotenv()
 
@@ -24,15 +27,6 @@ BUCKET_NAME = _require_env("BUCKET_NAME")
 LLM_MODEL = os.getenv("LLM")
 
 
-from dataclasses import dataclass
-
-from dotenv import load_dotenv
-from hr_core.config.parameters import load_parameters
-from hr_core.notifications.EmailNotificationChannel import EmailNotificationChannel
-from hr_core.notifications.INotificationChannel import INotificationChannel
-
-load_dotenv()
-
 PARAMETER_NAMES = [
     "DATABASE_URL",
     "GOOGLE_API_KEY",
@@ -40,7 +34,7 @@ PARAMETER_NAMES = [
     "SMTP_PASSWORD",
     "BUCKET_NAME",
     "FRONTEND_URL",
-    "LLM_MODEL"
+    "LLM_MODEL",
 ]
 
 SCORE_THRESHOLD = 50
@@ -68,7 +62,7 @@ def _load_settings() -> Settings:
         gmail_app_password=values["SMTP_PASSWORD"],
         bucket_name=values["BUCKET_NAME"],
         frontend_url=values["FRONTEND_URL"].rstrip("/"),
-        llm_model=values["LLM_MODEL"]
+        llm_model=values["LLM_MODEL"],
     )
 
 
