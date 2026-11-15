@@ -1,3 +1,5 @@
+from datetime import UTC, datetime, timedelta
+
 from starlette import status
 
 
@@ -131,3 +133,104 @@ def test_admin_without_company_cannot_use_vacancies(client):
 
 def test_vacancies_require_authentication(client):
     assert client.get("/vacancies/").status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def future(days=1):
+    return (datetime.now(UTC) + timedelta(days=days)).replace(microsecond=0)
+
+
+def test_deadline_schedules_analysis_on_create(client, fake_scheduler):
+    _, hr = setup_company(client, "boss", "Acme")
+    deadline = future()
+
+    response = create_vacancy(client, hr, deadline_at=deadline.isoformat())
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert fake_scheduler.scheduled == {response.json()["id"]: deadline}
+
+
+def test_no_deadline_means_no_schedule(client, fake_scheduler):
+    _, hr = setup_company(client, "boss", "Acme")
+
+    create_vacancy(client, hr)
+
+    assert fake_scheduler.scheduled == {}
+
+
+def test_closed_vacancy_is_not_scheduled(client, fake_scheduler):
+    _, hr = setup_company(client, "boss", "Acme")
+
+    create_vacancy(client, hr, deadline_at=future().isoformat(), status="closed")
+
+    assert fake_scheduler.scheduled == {}
+
+
+def test_deadline_must_be_future_and_timezone_aware(client, fake_scheduler):
+    _, hr = setup_company(client, "boss", "Acme")
+
+    past = create_vacancy(client, hr, deadline_at=future(-1).isoformat())
+    naive = create_vacancy(client, hr, deadline_at="2099-01-01T10:00:00")
+
+    assert past.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert naive.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert fake_scheduler.scheduled == {}
+    assert client.get("/vacancies/", headers=hr).json() == []
+
+
+def test_scheduling_failure_rolls_back_creation(client, fake_scheduler):
+    _, hr = setup_company(client, "boss", "Acme")
+    fake_scheduler.fail = True
+
+    response = create_vacancy(client, hr, deadline_at=future().isoformat())
+
+    assert response.status_code == status.HTTP_502_BAD_GATEWAY
+    assert client.get("/vacancies/", headers=hr).json() == []
+
+
+def test_changing_deadline_reschedules(client, fake_scheduler):
+    _, hr = setup_company(client, "boss", "Acme")
+    vacancy_id = create_vacancy(client, hr, deadline_at=future(1).isoformat()).json()["id"]
+    new_deadline = future(3)
+
+    client.patch(
+        f"/vacancies/{vacancy_id}", headers=hr, json={"deadline_at": new_deadline.isoformat()}
+    )
+
+    assert fake_scheduler.scheduled == {vacancy_id: new_deadline}
+
+
+def test_removing_deadline_or_closing_cancels_schedule(client, fake_scheduler):
+    _, hr = setup_company(client, "boss", "Acme")
+    vacancy_id = create_vacancy(client, hr, deadline_at=future().isoformat()).json()["id"]
+
+    client.patch(f"/vacancies/{vacancy_id}", headers=hr, json={"deadline_at": None})
+    assert fake_scheduler.scheduled == {}
+
+    client.patch(f"/vacancies/{vacancy_id}", headers=hr, json={"deadline_at": future().isoformat()})
+    assert vacancy_id in fake_scheduler.scheduled
+    client.patch(f"/vacancies/{vacancy_id}", headers=hr, json={"status": "closed"})
+    assert fake_scheduler.scheduled == {}
+
+    client.patch(f"/vacancies/{vacancy_id}", headers=hr, json={"status": "open"})
+    assert vacancy_id in fake_scheduler.scheduled
+
+
+def test_unrelated_update_leaves_schedule_alone(client, fake_scheduler):
+    _, hr = setup_company(client, "boss", "Acme")
+    vacancy_id = create_vacancy(client, hr, deadline_at=future().isoformat()).json()["id"]
+    fake_scheduler.cancelled.clear()
+
+    client.patch(f"/vacancies/{vacancy_id}", headers=hr, json={"title": "New title"})
+
+    assert vacancy_id in fake_scheduler.scheduled
+    assert fake_scheduler.cancelled == []
+
+
+def test_deleting_vacancy_cancels_schedule(client, fake_scheduler):
+    _, hr = setup_company(client, "boss", "Acme")
+    vacancy_id = create_vacancy(client, hr, deadline_at=future().isoformat()).json()["id"]
+
+    client.delete(f"/vacancies/{vacancy_id}", headers=hr)
+
+    assert fake_scheduler.scheduled == {}
+    assert fake_scheduler.cancelled == [vacancy_id]

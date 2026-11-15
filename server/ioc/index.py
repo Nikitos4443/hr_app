@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import Annotated
 
 from fastapi import Depends
@@ -28,6 +29,8 @@ from modules.users.UserService import UserService
 from modules.vacancies.IVacancyService import IVacancyService
 from modules.vacancies.VacancyService import VacancyService
 
+from config import settings
+from hr_core.event_bridge import AnalyzerScheduler
 from hr_core.s3.service import S3Service
 
 
@@ -47,13 +50,28 @@ def get_companies_service(
 CompaniesServiceDep = Annotated[ICompanyService, Depends(get_companies_service)]
 
 
+@lru_cache
+def get_analyzer_scheduler() -> AnalyzerScheduler:
+    return AnalyzerScheduler(
+        lambda_arn=settings.analyzer_lambda_arn,
+        role_arn=settings.analyzer_scheduler_role_arn,
+    )
+
+
+AnalyzerSchedulerDep = Annotated[AnalyzerScheduler, Depends(get_analyzer_scheduler)]
+
+
 def get_vacancies_service(
     repo: VacanciesRepoDep,
     users_service: UsersServiceDep,
     companies_service: CompaniesServiceDep,
+    scheduler: AnalyzerSchedulerDep,
 ) -> IVacancyService:
     return VacancyService(
-        repo=repo, users_service=users_service, companies_service=companies_service
+        repo=repo,
+        users_service=users_service,
+        companies_service=companies_service,
+        scheduler=scheduler,
     )
 
 

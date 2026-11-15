@@ -9,7 +9,7 @@ from hr_core.repository_interfaces.IVacanciesRepository import (
 )
 from hr_core.sql.tables.vacancies import Vacancies
 
-# Columns a vacancy owner may change; everything else (company, author, selection) is system-managed.
+# Columns a vacancy owner may change; company, author and selection status are system-managed.
 _UPDATABLE_FIELDS = (
     "title",
     "location",

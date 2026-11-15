@@ -36,6 +36,8 @@ PARAMETER_NAMES = [
     "BUCKET_NAME",
     "FRONTEND_URL",
     "LLM_MODEL",
+    "ANALYZER_LAMBDA_ARN",
+    "ANALYZER_SCHEDULER_ROLE_ARN",
 ]
 
 SCORE_THRESHOLD = 50
@@ -52,6 +54,8 @@ class Settings:
     bucket_name: str
     frontend_url: str
     llm_model: str
+    analyzer_lambda_arn: str
+    analyzer_scheduler_role_arn: str
 
 
 def _load_settings() -> Settings:
@@ -64,6 +68,8 @@ def _load_settings() -> Settings:
         bucket_name=values["BUCKET_NAME"],
         frontend_url=values["FRONTEND_URL"].rstrip("/"),
         llm_model=values["LLM_MODEL"],
+        analyzer_lambda_arn=values["ANALYZER_LAMBDA_ARN"],
+        analyzer_scheduler_role_arn=values["ANALYZER_SCHEDULER_ROLE_ARN"],
     )
 
 

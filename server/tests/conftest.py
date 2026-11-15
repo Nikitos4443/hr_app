@@ -13,10 +13,13 @@ os.environ["SMTP_USER"] = "test@example.com"
 os.environ["SMTP_PASSWORD"] = "test-smtp-password"
 os.environ["FRONTEND_URL"] = "http://localhost:3000"
 os.environ["LLM_MODEL"] = "google_genai:gemini-2.5-flash"
+os.environ["ANALYZER_LAMBDA_ARN"] = "arn:aws:lambda:eu-central-1:123456789012:function:analyzer"
+os.environ["ANALYZER_SCHEDULER_ROLE_ARN"] = "arn:aws:iam::123456789012:role/scheduler"
 
 import pytest
 from fastapi.testclient import TestClient
 from guard_core.handlers.ratelimit_handler import RateLimitManager
+from ioc.index import get_analyzer_scheduler
 from sqlalchemy.pool import StaticPool
 
 from app import fastapi_app as app
@@ -43,8 +46,33 @@ def session_factory():
     return testing_session
 
 
+class FakeScheduler:
+    """Stands in for AnalyzerScheduler so tests never talk to AWS."""
+
+    def __init__(self):
+        self.scheduled = {}
+        self.cancelled = []
+        self.fail = False
+
+    def schedule(self, vacancy_id, run_at):
+        if self.fail:
+            raise RuntimeError("scheduler is down")
+        self.scheduled[vacancy_id] = run_at
+
+    def cancel(self, vacancy_id):
+        if self.fail:
+            raise RuntimeError("scheduler is down")
+        self.scheduled.pop(vacancy_id, None)
+        self.cancelled.append(vacancy_id)
+
+
 @pytest.fixture
-def client(session_factory):
+def fake_scheduler():
+    return FakeScheduler()
+
+
+@pytest.fixture
+def client(session_factory, fake_scheduler):
     testing_session = session_factory
 
     def override_get_sql_db():
@@ -55,6 +83,7 @@ def client(session_factory):
             db.close()
 
     app.dependency_overrides[get_sql_db] = override_get_sql_db
+    app.dependency_overrides[get_analyzer_scheduler] = lambda: fake_scheduler
     with TestClient(app, client=("127.0.0.1", 50000)) as test_client:
         yield test_client
     app.dependency_overrides.clear()

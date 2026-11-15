@@ -11,6 +11,12 @@ def _validate_title(value: str) -> str:
     return value
 
 
+def _validate_deadline(value: datetime | None) -> datetime | None:
+    if value is not None and value.tzinfo is None:
+        raise ValueError("deadline_at має містити часову зону, напр. 2026-12-01T18:00:00Z")
+    return value
+
+
 class _SalaryRangeMixin(BaseModel):
     salary_min: int | None = Field(default=None, ge=0)
     salary_max: int | None = Field(default=None, ge=0)
@@ -40,6 +46,7 @@ class CreateVacancyDTO(_SalaryRangeMixin):
     deadline_at: datetime | None = None
 
     _check_title = field_validator("title")(_validate_title)
+    _check_deadline = field_validator("deadline_at")(_validate_deadline)
 
 
 class UpdateVacancyDTO(_SalaryRangeMixin):
@@ -59,3 +66,5 @@ class UpdateVacancyDTO(_SalaryRangeMixin):
     @classmethod
     def check_title(cls, value: str | None) -> str | None:
         return None if value is None else _validate_title(value)
+
+    _check_deadline = field_validator("deadline_at")(_validate_deadline)
