@@ -20,6 +20,7 @@ assistant = AIAssitant()
 
 
 def load_context(vacancy_id: int) -> ChatContext | None:
+    print("loading context...")
     with db.SessionLocal() as session:
         return assistant.get_context(
             get_vacancies_repository(sql_db=session),
@@ -42,6 +43,7 @@ async def chat_start(sid, data):
         return
 
     ctx = await asyncio.to_thread(load_context, vacancy_id)
+    print(f"CTX: {ctx}" )
     if ctx is None:
         await sio.emit("chat_error", {"error": "Vacancy not found"}, to=sid)
         return

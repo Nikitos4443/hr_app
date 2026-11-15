@@ -2,7 +2,6 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from ioc.index import AuthServiceDep
 from fastapi_utils.cbv import cbv
 from starlette import status
 

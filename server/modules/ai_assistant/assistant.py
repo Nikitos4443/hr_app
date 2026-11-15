@@ -24,12 +24,11 @@ class IAIAssitant(ABC):
     pass
 
 
-llm = init_chat_model(settings.llm_model)
 CLASSIFIER_HISTORY = 6
 
 class AIAssitant(IAIAssitant):
-    # Create ONE instance per app: the graph's InMemorySaver holds every chat's history.
-    def __init__(self, checkpointer=None):
+    def __init__(self, llm=None, checkpointer=None):
+        self.llm = llm or init_chat_model(settings.llm_model)
         self.graph = self.build_graph(checkpointer)
 
     @staticmethod
@@ -38,60 +37,67 @@ class AIAssitant(IAIAssitant):
         companies: ICompaniesRepository,
         vacancy_id: int,
     ) -> ChatContext | None:
-        """Sync DB access: repos are passed in per call, so the session can be short-lived."""
+        
         vacancy = vacancies.get_by_id(vacancy_id)
         if vacancy is None:
+            print("No vacancy found")
             return None
         company = companies.get_by_id(vacancy.company_id) if vacancy.company_id else None
         return ChatContext(vacancy=vacancy, company=company)
 
-    @staticmethod
-    async def classify_intent(state: State):
-        structured_llm = llm.with_structured_output(IntentClassifier)
+    async def classify_intent(self, state: State):
+        structured_llm = self.llm.with_structured_output(IntentClassifier)
         result = await structured_llm.ainvoke(
             [SystemMessage(CLASSIFIER_PROMPT), *state["messages"][-CLASSIFIER_HISTORY:]]
         )
         return {"message_intent": result.msg_intent}
 
 
-    @staticmethod
-    async def prompt_llm_vacancy(state: State):
+    async def prompt_llm_vacancy(self, state: State):
         system = VACANCY_PROMPT.format(
             rules=BASE_RULES,
             vacancy=format_vacancy(state.get("vacancy")),
             company=format_company(state.get("company"), state.get("vacancy")),
         )
-        response = await llm.ainvoke([SystemMessage(system), *state["messages"]])
+        response = await self.llm.ainvoke([SystemMessage(system), *state["messages"]])
         return {"messages": [response]}
 
 
-    @staticmethod
-    async def prompt_llm_company(state: State):
+    async def prompt_llm_company(self, state: State):
         system = COMPANY_PROMPT.format(
             rules=BASE_RULES,
             company=format_company(state.get("company"), state.get("vacancy")),
             vacancy=format_vacancy(state.get("vacancy")),
         )
-        response = await llm.ainvoke([SystemMessage(system), *state["messages"]])
+        response = await self.llm.ainvoke([SystemMessage(system), *state["messages"]])
         return {"messages": [response]}
 
 
-    @staticmethod
-    async def prompt_llm_unrelated(state: State):
+    async def prompt_llm_unrelated(self, state: State):
         vacancy = state.get("vacancy")
         system = UNRELATED_PROMPT.format(
             title=vacancy.title if vacancy else "this job",
             company=vacancy.company if vacancy else "this company",
         )
-        response = await llm.ainvoke([SystemMessage(system), state["messages"][-1]])
+        response = await self.llm.ainvoke([SystemMessage(system), state["messages"][-1]])
         return {"messages": [response]}
 
 
-    @staticmethod
-    def route_by_intent(state: State) -> str:
+    async def prompt_llm_helper(self, state: State):
+        vacancy = state.get("vacancy")
+        system = HELPER_PROMPT.format(
+            title=vacancy.title if vacancy else "this job",
+            company=vacancy.company if vacancy else "this company",
+        )
+        response = await self.llm.ainvoke([SystemMessage(system), state["messages"][-1]])
+        return {"messages": [response]}
+
+
+    def route_by_intent(self, state: State) -> str:
         return {
             "Vacancy": "vacancy_agent",
             "Company": "company_agent",
+            "Helper": "helper",
         }.get(state.get("message_intent"), "unrelated")
 
 
@@ -101,16 +107,18 @@ class AIAssitant(IAIAssitant):
         builder.add_node("classifier", self.classify_intent)
         builder.add_node("vacancy_agent", self.prompt_llm_vacancy)
         builder.add_node("company_agent", self.prompt_llm_company)
+        builder.add_node("helper", self.prompt_llm_helper)
         builder.add_node("unrelated", self.prompt_llm_unrelated)
 
         builder.add_edge(START, "classifier")
         builder.add_conditional_edges(
             "classifier",
             self.route_by_intent,
-            ["vacancy_agent", "company_agent", "unrelated"],
+            ["vacancy_agent", "company_agent", "helper", "unrelated"],
         )
         builder.add_edge("vacancy_agent", END)
         builder.add_edge("company_agent", END)
+        builder.add_edge("helper", END)
         builder.add_edge("unrelated", END)
         
 
@@ -131,7 +139,6 @@ class AIAssitant(IAIAssitant):
             },
             config={"configurable": {"thread_id": thread_id}},
         )
-        # .text, not .content: Gemini returns content as a list of blocks
         return result["messages"][-1].text
 
 

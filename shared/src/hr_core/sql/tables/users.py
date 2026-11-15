@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String
 
 from hr_core.sql.base import Base
 
@@ -10,3 +10,4 @@ class Users(Base):
     username = Column(String, unique=True, nullable=False, index=True)
     password = Column(String, nullable=False)
     role = Column(String, nullable=False, default="user")
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
