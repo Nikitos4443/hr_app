@@ -50,7 +50,7 @@ def guarded_client():
 
 
 def bearer(role, user_id=1, username="john"):
-    token = AuthService(repo=None).create_access_token(
+    token = AuthService(users_service=None).create_access_token(
         username, user_id, role, timedelta(minutes=5)
     )
     return {"Authorization": f"Bearer {token}"}

@@ -19,12 +19,21 @@ from modules.flow.services.IVideoService import IVideoService
 from modules.flow.services.ResumeService import ResumeService
 from modules.flow.services.TextService import TextService
 from modules.flow.services.VideoService import VideoService
+from modules.users.IUserService import IUserService
+from modules.users.UserService import UserService
 
 from hr_core.s3.service import S3Service
 
 
-def get_auth_service(repo: UsersRepoDep) -> IAuthService:
-    return AuthService(repo=repo)
+def get_users_service(repo: UsersRepoDep) -> IUserService:
+    return UserService(repo=repo)
+
+
+UsersServiceDep = Annotated[IUserService, Depends(get_users_service)]
+
+
+def get_auth_service(users_service: UsersServiceDep) -> IAuthService:
+    return AuthService(users_service=users_service)
 
 
 def get_resume_service(repo: ResumeVerificationRepoDep) -> IResumeService:

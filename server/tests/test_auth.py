@@ -54,34 +54,22 @@ def test_login_with_wrong_password(client):
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-def test_register_defaults_to_hr_role(client):
+def test_register_creates_company_admin_without_company(client):
     body = register(client).json()
     payload = jwt.decode(body["access_token"], SECRET_KEY, algorithms=[ALGORITHM])
-    assert payload["role"] == "hr"
+    assert payload["role"] == "company_admin"
 
 
-def test_register_company_admin_role(client):
+def test_register_ignores_role_and_company_from_request(client):
     response = client.post(
         "/auth/",
         json={
-            "username": "boss",
+            "username": "sneaky",
             "password": "secret123",
             "confirm_password": "secret123",
-            "role": "company_admin",
+            "role": "hr",
+            "company_id": 5,
         },
     )
     payload = jwt.decode(response.json()["access_token"], SECRET_KEY, algorithms=[ALGORITHM])
     assert payload["role"] == "company_admin"
-
-
-def test_register_rejects_unknown_role(client):
-    response = client.post(
-        "/auth/",
-        json={
-            "username": "boss",
-            "password": "secret123",
-            "confirm_password": "secret123",
-            "role": "superuser",
-        },
-    )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT

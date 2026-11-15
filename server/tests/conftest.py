@@ -24,13 +24,19 @@ from hr_core.sql.session import create_all_tables, create_session_factory
 
 
 @pytest.fixture
-def client():
+def session_factory():
     testing_session = create_session_factory(
         "sqlite://",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
     create_all_tables(testing_session)
+    return testing_session
+
+
+@pytest.fixture
+def client(session_factory):
+    testing_session = session_factory
 
     def override_get_sql_db():
         db = testing_session()
