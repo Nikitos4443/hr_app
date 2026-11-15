@@ -2,6 +2,7 @@ import os
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
+from guard import SecurityConfig
 
 from hr_core.config.parameters import load_parameters
 
@@ -67,3 +68,18 @@ def _load_settings() -> Settings:
 
 
 settings = _load_settings()
+
+
+security_config = SecurityConfig(
+    enable_redis=False,
+    enable_rate_limiting=True,
+    rate_limit=100,
+    rate_limit_window=60,
+    enable_cors=True,
+    cors_allow_origins=[settings.frontend_url],
+    cors_allow_methods=["GET", "POST"],
+    cors_allow_headers=["*"],
+    cors_allow_credentials=True,
+    cors_expose_headers=["X-Custom-Header"],
+    cors_max_age=600,
+)

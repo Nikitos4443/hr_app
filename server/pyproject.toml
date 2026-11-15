@@ -24,6 +24,7 @@ dependencies = [
     "langchain-google-genai>=4.4.2",
     "eventlet>=0.41.3",
     "python-socketio>=5.18.1",
+    "fastapi-guard>=8.1.2",
 ]
 
 [tool.uv]
