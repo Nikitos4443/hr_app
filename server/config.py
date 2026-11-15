@@ -27,6 +27,14 @@ BUCKET_NAME = _require_env("BUCKET_NAME")
 LLM_MODEL = os.getenv("LLM")
 
 
+from dataclasses import dataclass
+
+from dotenv import load_dotenv
+
+from hr_core.config.parameters import load_parameters
+
+load_dotenv()
+
 PARAMETER_NAMES = [
     "DATABASE_URL",
     "GOOGLE_API_KEY",
