@@ -31,7 +31,7 @@ class AuthService(IAuthService):
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Could not validate user",
                 )
-            return {"username": username, "id": user_id}
+            return {"username": username, "id": user_id, "role": payload.get("role")}
         except PyJWTError as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user"
@@ -41,7 +41,8 @@ class AuthService(IAuthService):
         create_user_model = User(
             username=create_user_req.username,
             password=self.hash_password(create_user_req.password),
-            role="user",
+            role=create_user_req.role,
+            company_id=create_user_req.company_id,
         )
 
         self.repo.create_user(create_user_model)
@@ -53,7 +54,7 @@ class AuthService(IAuthService):
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user"
             )
         token = self.create_access_token(
-            user.username, user.id, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            user.username, user.id, user.role, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         )
         return {"access_token": token, "token_type": "bearer"}
 
@@ -68,8 +69,8 @@ class AuthService(IAuthService):
             return False
         return user
 
-    def create_access_token(self, username: str, user_id: int, expires_delta: timedelta):
-        encode = {"sub": username, "id": user_id}
+    def create_access_token(self, username: str, user_id: int, role: str, expires_delta: timedelta):
+        encode = {"sub": username, "id": user_id, "role": str(role)}
         expires = datetime.now(UTC) + expires_delta
         encode.update({"exp": expires})
         return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)

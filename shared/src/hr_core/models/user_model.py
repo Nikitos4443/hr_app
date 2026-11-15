@@ -1,11 +1,18 @@
+from enum import StrEnum
+
 from pydantic import BaseModel, field_validator
+
+
+class UserRole(StrEnum):
+    COMPANY_ADMIN = "company_admin"
+    HR = "hr"
 
 
 class User(BaseModel):
     id: int | None = None
     username: str
     password: str
-    role: str = "user"
+    role: UserRole = UserRole.HR
     company_id: int | None = None
 
     @field_validator("username")

@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from hr_core.models.user_model import User
+from hr_core.models.user_model import User, UserRole
 from hr_core.repository_interfaces.IUsersRepository import IUsersRepository
 from hr_core.sql.tables.users import Users
 
@@ -15,7 +15,7 @@ class SQLUsersRepository(IUsersRepository):
         user = Users(
             username=entity.username,
             password=entity.password,
-            role=entity.role,
+            role=UserRole(entity.role).value,
             company_id=entity.company_id,
         )
         self.db.add(user)
@@ -30,7 +30,7 @@ class SQLUsersRepository(IUsersRepository):
             id=userEntity.id,
             username=userEntity.username,
             password=userEntity.password,
-            role=userEntity.role,
+            role=UserRole(userEntity.role),
             company_id=userEntity.company_id,
         )
         return user
