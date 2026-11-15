@@ -9,6 +9,7 @@ class Vacancies(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     company = Column(String, nullable=False)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
     location = Column(String, nullable=True)
     employment_type = Column(String, nullable=True)
     experience_years_min = Column(Integer, nullable=True)

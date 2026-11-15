@@ -9,6 +9,7 @@ class Vacancy(BaseModel):
     id: int | None = None
     title: str
     company: str
+    company_id: int | None = None
     location: str | None = None
     employment_type: str | None = None
     experience_years_min: int | None = None

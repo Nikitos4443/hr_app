@@ -12,7 +12,12 @@ class SQLUsersRepository(IUsersRepository):
         self.db = db
 
     def create_user(self, entity: User):
-        user = Users(username=entity.username, password=entity.password, role=entity.role)
+        user = Users(
+            username=entity.username,
+            password=entity.password,
+            role=entity.role,
+            company_id=entity.company_id,
+        )
         self.db.add(user)
         self.db.commit()
 
@@ -26,5 +31,6 @@ class SQLUsersRepository(IUsersRepository):
             username=userEntity.username,
             password=userEntity.password,
             role=userEntity.role,
+            company_id=userEntity.company_id,
         )
         return user

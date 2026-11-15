@@ -11,7 +11,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
 
-from app import app
+from app import fastapi_app as app
 from database.init_db import get_sql_db
 from hr_core.sql.session import create_all_tables, create_session_factory
 

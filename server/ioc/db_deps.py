@@ -8,6 +8,7 @@ from config import DATABASE_PROVIDER
 from database.init_db import get_mongo_db, get_sql_db
 from hr_core.mongo.repositories.MongoUsersRepository import MongoUsersRepository
 from hr_core.repository_interfaces.IApplicationsRepository import IApplicationsRepository
+from hr_core.repository_interfaces.ICompaniesRepository import ICompaniesRepository
 from hr_core.repository_interfaces.IEvaluationsRepository import IEvaluationsRepository
 from hr_core.repository_interfaces.IQuestionsRepository import IQuestionsRepository
 from hr_core.repository_interfaces.IResumeVerificationRepository import (
@@ -22,6 +23,7 @@ from hr_core.repository_interfaces.IVideoVerificationRepository import (
     IVideoVerificationRepository,
 )
 from hr_core.sql.repositories.SQLApplicationsRepository import SQLApplicationsRepository
+from hr_core.sql.repositories.SQLCompaniesRepository import SQLCompaniesRepository
 from hr_core.sql.repositories.SQLEvaluationsRepository import SQLEvaluationsRepository
 from hr_core.sql.repositories.SQLQuestionsRepository import SQLQuestionsRepository
 from hr_core.sql.repositories.SQLResumeVerificationRepository import (
@@ -66,6 +68,15 @@ def get_vacancies_repository(sql_db: SqlDbDep) -> IVacanciesRepository:
 
 
 VacanciesRepoDep = Annotated[IVacanciesRepository, Depends(get_vacancies_repository)]
+
+
+def get_companies_repository(sql_db: SqlDbDep) -> IVacanciesRepository:
+    if DATABASE_PROVIDER == "sql":
+        return SQLCompaniesRepository(db=sql_db)
+    raise _unsupported_provider("CompaniesRepository")
+
+
+CompaniesRepoDep = Annotated[ICompaniesRepository, Depends(get_companies_repository)]
 
 
 def get_applications_repository(sql_db: SqlDbDep) -> IApplicationsRepository:

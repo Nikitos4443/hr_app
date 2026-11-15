@@ -6,6 +6,7 @@ class User(BaseModel):
     username: str
     password: str
     role: str = "user"
+    company_id: int | None = None
 
     @field_validator("username")
     @classmethod
