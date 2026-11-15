@@ -6,6 +6,11 @@ import {Duration} from "aws-cdk-lib";
 import {IBucketNameProps} from "../interfaces";
 import { pythonLambdaCode } from "./python-lambda-code";
 import * as ssm from 'aws-cdk-lib/aws-ssm';
+import {
+  ANALYZER_SCHEDULER_ROLE_NAME,
+  SSM_ANALYZER_LAMBDA_ARN,
+  SSM_ANALYZER_SCHEDULER_ROLE_ARN,
+} from "../constants";
 
 export class AnalyzerLambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: IBucketNameProps) {
@@ -32,9 +37,21 @@ export class AnalyzerLambdaStack extends cdk.Stack {
     geminiKeyParameter.grantRead(fn);
 
     const schedulerRole = new iam.Role(this, 'EventBridgeSchedulerRole', {
+      roleName: ANALYZER_SCHEDULER_ROLE_NAME,
       assumedBy: new iam.ServicePrincipal('scheduler.amazonaws.com'),
     });
 
     fn.grantInvoke(schedulerRole);
+
+    // Published for the server, which schedules analyzer runs (read in server/config.py).
+    new ssm.StringParameter(this, 'AnalyzerLambdaArnParameter', {
+      parameterName: SSM_ANALYZER_LAMBDA_ARN,
+      stringValue: fn.functionArn,
+    });
+
+    new ssm.StringParameter(this, 'AnalyzerSchedulerRoleArnParameter', {
+      parameterName: SSM_ANALYZER_SCHEDULER_ROLE_ARN,
+      stringValue: schedulerRole.roleArn,
+    });
   }
 }

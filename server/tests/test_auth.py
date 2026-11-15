@@ -52,3 +52,24 @@ def test_login_with_wrong_password(client):
     response = client.post("/auth/token", data={"username": "john", "password": "nope"})
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_register_creates_company_admin_without_company(client):
+    body = register(client).json()
+    payload = jwt.decode(body["access_token"], SECRET_KEY, algorithms=[ALGORITHM])
+    assert payload["role"] == "company_admin"
+
+
+def test_register_ignores_role_and_company_from_request(client):
+    response = client.post(
+        "/auth/",
+        json={
+            "username": "sneaky",
+            "password": "secret123",
+            "confirm_password": "secret123",
+            "role": "hr",
+            "company_id": 5,
+        },
+    )
+    payload = jwt.decode(response.json()["access_token"], SECRET_KEY, algorithms=[ALGORITHM])
+    assert payload["role"] == "company_admin"

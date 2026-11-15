@@ -2,6 +2,7 @@ import os
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
+from guard import SecurityConfig
 
 from hr_core.config.parameters import load_parameters
 
@@ -35,6 +36,8 @@ PARAMETER_NAMES = [
     "BUCKET_NAME",
     "FRONTEND_URL",
     "LLM_MODEL",
+    "ANALYZER_LAMBDA_ARN",
+    "ANALYZER_SCHEDULER_ROLE_ARN",
 ]
 
 SCORE_THRESHOLD = 50
@@ -51,6 +54,8 @@ class Settings:
     bucket_name: str
     frontend_url: str
     llm_model: str
+    analyzer_lambda_arn: str
+    analyzer_scheduler_role_arn: str
 
 
 def _load_settings() -> Settings:
@@ -63,7 +68,24 @@ def _load_settings() -> Settings:
         bucket_name=values["BUCKET_NAME"],
         frontend_url=values["FRONTEND_URL"].rstrip("/"),
         llm_model=values["LLM_MODEL"],
+        analyzer_lambda_arn=values["ANALYZER_LAMBDA_ARN"],
+        analyzer_scheduler_role_arn=values["ANALYZER_SCHEDULER_ROLE_ARN"],
     )
 
 
 settings = _load_settings()
+
+
+security_config = SecurityConfig(
+    enable_redis=False,
+    enable_rate_limiting=True,
+    rate_limit=100,
+    rate_limit_window=60,
+    enable_cors=True,
+    cors_allow_origins=[settings.frontend_url],
+    cors_allow_methods=["GET", "POST"],
+    cors_allow_headers=["*"],
+    cors_allow_credentials=True,
+    cors_expose_headers=["X-Custom-Header"],
+    cors_max_age=600,
+)
