@@ -8,6 +8,13 @@ export const BUCKET_CV_PREFIX = 'CV/'
 
 export const BUCKET_FFMPEG_LAYER_KEY = 'ffmpeg/ffmpeg.zip'
 
+export const MAIN_SERVER_APP_DIR = '/opt/hrapp'
+
+// SecureString parameter holding the contents of server/.env
+export const MAIN_SERVER_ENV_PARAMETER = '/hr-app/main-server/env'
+
+export const CADDY_VERSION = '2.10.0'
+
 // Fixed name so other stacks (e.g. the server) can build the role ARN for iam:PassRole
 // without a cross-stack reference.
 export const ANALYZER_SCHEDULER_ROLE_NAME = 'hr-analyzer-scheduler-role'

@@ -1,0 +1,31 @@
+# Web server config for the main server (installed to /etc/caddy/Caddyfile by deploy-main-server.sh).
+#
+# SITE_ADDRESS comes from /etc/caddy/env (written by the deploy script). It is the instance's
+# public AWS hostname (ec2-x-x-x-x.<region>.compute.amazonaws.com), so Caddy obtains and renews a
+# Let's Encrypt certificate and redirects HTTP -> HTTPS on its own. To use a custom domain,
+# set SITE_ADDRESS_OVERRIDE in deploy-main-server.sh. Falls back to plain HTTP on :80.
+{$SITE_ADDRESS::80} {
+	root * /opt/hrapp/client
+	encode zstd gzip
+
+	request_body {
+		max_size 200MB
+	}
+
+	# REST API: /api/foo -> backend /foo (server routes have no /api prefix)
+	handle /api/* {
+		uri strip_prefix /api
+		reverse_proxy 127.0.0.1:8000
+	}
+
+	# Socket.IO (websocket upgrade is handled automatically by reverse_proxy)
+	handle /socket.io/* {
+		reverse_proxy 127.0.0.1:8000
+	}
+
+	# Vue SPA with history-mode fallback
+	handle {
+		try_files {path} /index.html
+		file_server
+	}
+}
