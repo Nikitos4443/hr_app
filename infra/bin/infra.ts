@@ -21,10 +21,10 @@ const fullBucketName = BUCKET_RAW_NAME + `-${env.account}-${env.region}`
 const stacks: Record<string, () => cdk.Stack> = {
   S3StorageStack: () => new S3StorageStack(app, 'S3StorageStack', {env}),
 
-  // MainServerStack: () => new MainServerStack(app, 'MainServerStack', {
-  //   bucketName: fullBucketName,
-  //   env,
-  // }),
+  MainServerStack: () => new MainServerStack(app, 'MainServerStack', {
+    bucketName: fullBucketName,
+    env,
+  }),
 
   VideoPipelineStack: () => new VideoPipelineStack(app, 'VideoPipelineStack', {
     bucketName: fullBucketName,
