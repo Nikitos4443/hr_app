@@ -1,6 +1,9 @@
 import os
+from dataclasses import dataclass
 
 from dotenv import load_dotenv
+
+from hr_core.config.parameters import load_parameters
 
 load_dotenv()
 

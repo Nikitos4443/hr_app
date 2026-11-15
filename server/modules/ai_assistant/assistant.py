@@ -1,27 +1,43 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import SystemMessage
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 from modules.ai_assistant.chat_context import ChatContext
-from modules.ai_assistant.format import *
+from modules.ai_assistant.format import format_company, format_vacancy
 from modules.ai_assistant.intent import IntentClassifier
-from modules.ai_assistant.prompts import *
+from modules.ai_assistant.prompts import (
+    BASE_RULES,
+    CLASSIFIER_PROMPT,
+    COMPANY_PROMPT,
+    HELPER_PROMPT,
+    UNRELATED_PROMPT,
+    VACANCY_PROMPT,
+)
 from modules.ai_assistant.state import State
 
 from config import settings
 from hr_core.models.company_model import Company
 from hr_core.models.vacancy_model import Vacancy
 from hr_core.repository_interfaces.ICompaniesRepository import ICompaniesRepository
+from hr_core.repository_interfaces.ICompaniesRepository import ICompaniesRepository
 from hr_core.repository_interfaces.IVacanciesRepository import IVacanciesRepository
 
 
 class IAIAssitant(ABC):
-    pass
+    @abstractmethod
+    async def ask(
+        self,
+        thread_id: str,
+        text: str,
+        vacancy: Vacancy | None,
+        company: Company | None = None,
+    ) -> str: ...
 
 
 CLASSIFIER_HISTORY = 6
+
 
 
 class AIAssitant(IAIAssitant):
@@ -35,6 +51,7 @@ class AIAssitant(IAIAssitant):
         companies: ICompaniesRepository,
         vacancy_id: int,
     ) -> ChatContext | None:
+
 
         vacancy = vacancies.get_by_id(vacancy_id)
         if vacancy is None:
@@ -116,6 +133,8 @@ class AIAssitant(IAIAssitant):
 
     async def ask(
         self,
+    async def ask(
+        self,
         thread_id: str,
         text: str,
         vacancy: Vacancy | None,
@@ -131,3 +150,4 @@ class AIAssitant(IAIAssitant):
             config={"configurable": {"thread_id": thread_id}},
         )
         return result["messages"][-1].text
+

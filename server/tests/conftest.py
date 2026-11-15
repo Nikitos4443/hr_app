@@ -6,6 +6,13 @@ os.environ["BUCKET_NAME"] = "test-bucket"
 os.environ["ALGORITHM"] = "HS256"
 os.environ["SQLALCHEMY_DATABASE_URL"] = "sqlite://"
 os.environ["DATABASE_PROVIDER"] = "sql"
+# config.settings falls back to AWS SSM for anything missing, which CI can't reach.
+os.environ["DATABASE_URL"] = "sqlite://"
+os.environ["GOOGLE_API_KEY"] = "test-google-api-key"
+os.environ["SMTP_USER"] = "test@example.com"
+os.environ["SMTP_PASSWORD"] = "test-smtp-password"
+os.environ["FRONTEND_URL"] = "http://localhost:3000"
+os.environ["LLM_MODEL"] = "google_genai:gemini-2.5-flash"
 
 import pytest
 from fastapi.testclient import TestClient
