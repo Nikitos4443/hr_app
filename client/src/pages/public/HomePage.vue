@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 
+import { useTheme } from '@/shared/composables/useTheme'
 import { AiStatus, AiSummary, ScoreBar, StatusTag } from '@/shared/ui'
 
-function toggleTheme() {
-  document.documentElement.classList.toggle('app-dark')
-}
+const { isDark, toggleTheme } = useTheme()
 </script>
 
 <template>
   <main style="padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem; max-width: 720px">
     <h1 style="margin: 0">HR App · shared/ui</h1>
-    <Button label="Toggle theme" icon="pi pi-moon" severity="secondary" @click="toggleTheme" />
+    <Button
+      label="Toggle theme"
+      :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
+      severity="secondary"
+      @click="toggleTheme"
+    />
 
     <section style="display: flex; flex-wrap: wrap; gap: 8px">
       <StatusTag kind="vacancy" status="open" />
