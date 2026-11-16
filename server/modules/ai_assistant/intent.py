@@ -16,3 +16,12 @@ class IntentClassifier(BaseModel):
             "Unrelated - anything that is not about this job or this company."
         ),
     )
+    search_query: str | None = Field(
+        default=None,
+        description=(
+            "For Vacancy and Company only: the candidate's last question rewritten as a "
+            "standalone search query, resolving follow-ups from the conversation "
+            "(e.g. 'and the vacation?' -> 'how many vacation days do employees get'). "
+            "Keep the candidate's language. Null for Helper and Unrelated."
+        ),
+    )

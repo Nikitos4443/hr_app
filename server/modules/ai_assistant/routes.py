@@ -8,25 +8,22 @@ Client -> server:
 import asyncio
 
 import socketio
-from ioc.db_deps import get_companies_repository, get_vacancies_repository
+from ioc.db_deps import get_vacancies_repository
 from modules.ai_assistant.assistant import AIAssitant
 from modules.ai_assistant.chat_context import ChatContext
+from modules.ai_assistant.rag import build_retriever
 
 from database import init_db as db
 
 sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
 
-assistant = AIAssitant()
+assistant = AIAssitant(retriever=build_retriever())
 
 
 def load_context(vacancy_id: int) -> ChatContext | None:
     print("loading context...")
     with db.SessionLocal() as session:
-        return assistant.get_context(
-            get_vacancies_repository(sql_db=session),
-            get_companies_repository(sql_db=session),
-            vacancy_id,
-        )
+        return assistant.get_context(get_vacancies_repository(sql_db=session), vacancy_id)
 
 
 @sio.event
@@ -49,7 +46,7 @@ async def chat_start(sid, data):
         return
 
     await sio.save_session(sid, {"ctx": ctx, "thread_id": f"{sid}:{vacancy_id}"})
-    await sio.emit("chat_started", {"vacancy_id": vacancy_id, "title": ctx.vacancy.title}, to=sid)
+    await sio.emit("chat_started", {"vacancy_id": vacancy_id, "title": ctx.vacancy_title}, to=sid)
 
 
 @sio.on("msg_event")
@@ -67,7 +64,7 @@ async def msg_event(sid, data):
 
     await sio.emit("bot_typing", to=sid)
     try:
-        answer = await assistant.ask(session["thread_id"], text, ctx.vacancy, ctx.company)
+        answer = await assistant.ask(session["thread_id"], text, ctx)
     except Exception as e:
         print("assistant error:", repr(e))
         await sio.emit("chat_error", {"error": "Assistant is unavailable"}, to=sid)

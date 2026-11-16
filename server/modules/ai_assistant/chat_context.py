@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 
-from hr_core.models.company_model import Company
-from hr_core.models.vacancy_model import Vacancy
 
-
-@dataclass
+@dataclass(frozen=True)
 class ChatContext:
-    vacancy: Vacancy
-    company: Company | None
+    """Which vacancy the chat is about. Only ids and names: everything the assistant says
+    about the vacancy and the company comes from the vector store (see rag.py)."""
+
+    vacancy_id: int
+    company_id: int | None
+    vacancy_title: str
+    company_name: str
