@@ -26,6 +26,9 @@ MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "sql")
 BUCKET_NAME = _require_env("BUCKET_NAME")
 
 LLM_MODEL = os.getenv("LLM")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "gemini-embedding-001")
+# Changing this requires re-ingesting the knowledge base (vector column has a fixed size).
+EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "768"))
 
 
 PARAMETER_NAMES = [
@@ -83,7 +86,7 @@ security_config = SecurityConfig(
     rate_limit_window=60,
     enable_cors=True,
     cors_allow_origins=[settings.frontend_url],
-    cors_allow_methods=["GET", "POST"],
+    cors_allow_methods=["GET", "POST", "DELETE", "PATCH", "PUT"],
     cors_allow_headers=["*"],
     cors_allow_credentials=True,
     cors_expose_headers=["X-Custom-Header"],

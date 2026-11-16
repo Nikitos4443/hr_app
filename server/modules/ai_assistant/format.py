@@ -1,3 +1,5 @@
+"""Plain-text form of vacancies and companies, as they are stored in the vector index."""
+
 from hr_core.models.company_model import Company
 from hr_core.models.vacancy_model import Vacancy
 
@@ -17,9 +19,7 @@ def _bullets(items: list[str]) -> str:
     return "\n".join(f"  - {item}" for item in items)
 
 
-def format_vacancy(v: Vacancy | None) -> str:
-    if v is None:
-        return "No vacancy information available."
+def format_vacancy(v: Vacancy) -> str:
     lines = [f"Title: {v.title}", f"Company: {v.company}"]
     if v.location:
         lines.append(f"Location: {v.location}")
@@ -43,12 +43,7 @@ def format_vacancy(v: Vacancy | None) -> str:
     return "\n".join(lines)
 
 
-def format_company(c: Company | None, v: Vacancy | None = None) -> str:
-    if c is None:
-        if v is not None:
-            return f"Name: {v.company}\nNo other company information available."
-        return "No company information available."
-
+def format_company(c: Company) -> str:
     lines = [f"Name: {c.name}"]
     if c.website:
         lines.append(f"Website: {c.website}")

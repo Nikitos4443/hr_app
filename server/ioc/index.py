@@ -12,6 +12,7 @@ from ioc.db_deps import (
     VacanciesRepoDep,
     VideoVerificationRepoDep,
 )
+from modules.ai_assistant.rag import IKnowledgeIndex, get_knowledge_index
 from modules.applications.ApplicationService import ApplicationsService
 from modules.applications.IApplicationService import IApplicationService
 from modules.auth.AuthService import AuthService
@@ -24,6 +25,9 @@ from modules.flow.services.IVideoService import IVideoService
 from modules.flow.services.ResumeService import ResumeService
 from modules.flow.services.TextService import TextService
 from modules.flow.services.VideoService import VideoService
+from modules.knowledge.IKnowledgeService import IKnowledgeService
+from modules.knowledge.KnowledgeService import KnowledgeService
+from modules.knowledge.sync import CatalogSync
 from modules.users.IUserService import IUserService
 from modules.users.UserService import UserService
 from modules.vacancies.IVacancyService import IVacancyService
@@ -48,6 +52,18 @@ def get_companies_service(
 
 
 CompaniesServiceDep = Annotated[ICompanyService, Depends(get_companies_service)]
+
+KnowledgeIndexDep = Annotated[IKnowledgeIndex | None, Depends(get_knowledge_index)]
+
+
+def get_catalog_sync(index: KnowledgeIndexDep) -> CatalogSync:
+    return CatalogSync(index=index)
+
+
+def get_knowledge_service(
+    index: KnowledgeIndexDep, users_service: UsersServiceDep
+) -> IKnowledgeService:
+    return KnowledgeService(index=index, users_service=users_service)
 
 
 @lru_cache

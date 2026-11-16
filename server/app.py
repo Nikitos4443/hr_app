@@ -6,6 +6,7 @@ from modules.auth import routes as auth_routes
 from modules.auth.guards import guard_deco
 from modules.companies import routes as companies_routes
 from modules.flow import routes as flow_routes
+from modules.knowledge import routes as knowledge_routes
 from modules.users import routes as users_routes
 from modules.vacancies import routes as vacancies_routes
 
@@ -22,4 +23,5 @@ fastapi_app.include_router(flow_routes.router)
 fastapi_app.include_router(users_routes.router)
 fastapi_app.include_router(companies_routes.router)
 fastapi_app.include_router(vacancies_routes.router)
+fastapi_app.include_router(knowledge_routes.router)
 app = socketio.ASGIApp(sio, other_asgi_app=fastapi_app)
