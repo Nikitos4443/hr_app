@@ -5,6 +5,7 @@ import { createApp } from 'vue'
 
 import App from './App.vue'
 import router from './router'
+import { setupHttp } from './providers/http'
 import { setupPinia } from './providers/pinia'
 import { setupPrimeVue } from './providers/primevue'
 import { setupQuery } from './providers/query'
@@ -16,6 +17,7 @@ export function bootstrap() {
   const app = createApp(App)
 
   setupPinia(app)
+  setupHttp()
   app.use(router)
   setupPrimeVue(app)
   setupQuery(app)
