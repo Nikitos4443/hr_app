@@ -3,12 +3,14 @@ import { useMutation, useQuery } from '@tanstack/vue-query'
 
 import { uploadToPresignedPost } from '@/shared/api'
 
-import type { ScreeningSession } from '../types/screening'
+import type { ScreeningQuestions, ScreeningSession } from '../types/screening'
 import { screeningApi } from './screening.api'
+import { screeningQuestionsApi } from './screening-questions.api'
 
 export const screeningKeys = {
   all: ['screening'] as const,
   session: (token: string) => [...screeningKeys.all, 'session', token] as const,
+  questions: (token: string) => [...screeningKeys.all, 'questions', token] as const,
 }
 
 export function useScreeningQuery(token: MaybeRefOrGetter<string | null | undefined>) {
@@ -17,6 +19,16 @@ export function useScreeningQuery(token: MaybeRefOrGetter<string | null | undefi
     queryFn: () => screeningApi.get(toValue(token)!),
     enabled: computed(() => !!toValue(token)),
     retry: false,
+  })
+}
+
+export function useScreeningQuestionsQuery(token: MaybeRefOrGetter<string | null | undefined>) {
+  return useQuery<ScreeningQuestions>({
+    queryKey: computed(() => screeningKeys.questions(toValue(token) ?? '')),
+    queryFn: () => screeningQuestionsApi.get(toValue(token)!),
+    enabled: computed(() => !!toValue(token)),
+    retry: false,
+    staleTime: Infinity,
   })
 }
 
@@ -37,7 +49,8 @@ export function useUploadVideoAnswerMutation(token: MaybeRefOrGetter<string>) {
   return useMutation({
     mutationFn: async ({ questionId, video, onProgress }: UploadVideoInput) => {
       const post = await screeningApi.getVideoUploadUrl(toValue(token), questionId)
-      await uploadToPresignedPost(post, video, { onProgress })
+      const fields = { ...post.fields, 'Content-Type': video.type || 'video/webm' }
+      await uploadToPresignedPost({ ...post, fields }, video, { onProgress })
     },
   })
 }
