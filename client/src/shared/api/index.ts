@@ -1,5 +1,12 @@
 export { http, request, configureHttp } from './http'
 export type { AuthMode, HttpHooks, RequestOptions } from './http'
-export { ApiError, isApiError, isUnauthorized, isForbidden, isNotFound } from './errors'
+export {
+  ApiError,
+  errorMessage,
+  isApiError,
+  isUnauthorized,
+  isForbidden,
+  isNotFound,
+} from './errors'
 export { uploadToPresignedPost } from './s3-upload'
 export type { PresignedPost } from './s3-upload'

@@ -46,3 +46,7 @@ export const isApiError = (e: unknown): e is ApiError => e instanceof ApiError
 export const isUnauthorized = (e: unknown) => isApiError(e) && e.status === 401
 export const isForbidden = (e: unknown) => isApiError(e) && e.status === 403
 export const isNotFound = (e: unknown) => isApiError(e) && e.status === 404
+
+export function errorMessage(error: unknown, fallback = 'Unexpected error'): string {
+  return isApiError(error) ? error.detail : error instanceof Error ? error.message : fallback
+}

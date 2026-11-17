@@ -8,6 +8,7 @@ import type { AuthUser, UserRole } from '../types/auth'
 export const useSessionStore = defineStore('session', () => {
   const token = ref<string | null>(null)
   const user = ref<AuthUser | null>(null)
+  const expired = ref(false)
   let expiryTimer: ReturnType<typeof setTimeout> | undefined
 
   const isAuthenticated = computed(() => token.value !== null && user.value !== null)
@@ -18,10 +19,16 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   function logout() {
+    expired.value = false
     clearTimer()
     token.value = null
     user.value = null
     writeToken(null)
+  }
+
+  function expire() {
+    logout()
+    expired.value = true
   }
 
   function setToken(next: string): boolean {
@@ -31,6 +38,7 @@ export const useSessionStore = defineStore('session', () => {
       return false
     }
 
+    expired.value = false
     token.value = next
     user.value = { id: claims.id, username: claims.sub, role: claims.role }
     writeToken(next)
@@ -38,7 +46,7 @@ export const useSessionStore = defineStore('session', () => {
     clearTimer()
     if (claims.exp !== undefined) {
       const ms = Math.min(claims.exp * 1000 - Date.now(), 2 ** 31 - 1)
-      expiryTimer = setTimeout(logout, Math.max(ms, 0))
+      expiryTimer = setTimeout(expire, Math.max(ms, 0))
     }
     return true
   }
@@ -52,5 +60,5 @@ export const useSessionStore = defineStore('session', () => {
     return user.value !== null && roles.includes(user.value.role)
   }
 
-  return { token, user, isAuthenticated, setToken, logout, restore, hasRole }
+  return { token, user, expired, isAuthenticated, setToken, logout, expire, restore, hasRole }
 })

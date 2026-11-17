@@ -10,7 +10,7 @@ export function setupHttp() {
 
   configureHttp({
     getToken: () => session.token,
-    onUnauthorized: () => session.logout(),
+    onUnauthorized: () => session.expire(),
   })
 
   session.restore()
