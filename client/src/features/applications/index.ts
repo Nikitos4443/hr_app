@@ -1,3 +1,5 @@
 export * from './api/apply.queries'
+export { default as ApplyForm } from './components/ApplyForm.vue'
+export { MAX_RESUME_SIZE_BYTES, RESUME_CONTENT_TYPE } from './lib/resume'
 export type { SubmitApplicationInput } from './api/apply.api'
 export type { CreateApplicationPayload } from './types/application'
