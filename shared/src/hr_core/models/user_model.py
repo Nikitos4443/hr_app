@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import StrEnum
 
 from pydantic import BaseModel, field_validator
@@ -14,6 +15,7 @@ class User(BaseModel):
     password: str
     role: UserRole = UserRole.HR
     company_id: int | None = None
+    created_at: datetime | None = None
 
     @field_validator("username")
     @classmethod

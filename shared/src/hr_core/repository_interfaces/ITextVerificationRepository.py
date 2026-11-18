@@ -17,3 +17,6 @@ class ITextVerificationRepository(ABC):
 
     @abstractmethod
     def delete_by_application(self, application_id: int) -> None: ...
+
+    @abstractmethod
+    def list_by_application(self, application_id: int) -> list[TextVerification]: ...

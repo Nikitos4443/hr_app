@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
 
 from hr_core.models.user_model import UserRole
@@ -10,3 +12,4 @@ class UserResponse(BaseModel):
     username: str
     role: UserRole
     company_id: int | None
+    created_at: datetime | None = None
