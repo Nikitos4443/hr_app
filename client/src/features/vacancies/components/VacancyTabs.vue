@@ -6,6 +6,8 @@ export type VacancyTabKey = 'overview' | 'candidates' | 'questions'
 import Badge from 'primevue/badge'
 import Tab from 'primevue/tab'
 import TabList from 'primevue/tablist'
+import TabPanel from 'primevue/tabpanel'
+import TabPanels from 'primevue/tabpanels'
 import Tabs from 'primevue/tabs'
 
 defineProps<{
@@ -22,8 +24,8 @@ function onChange(value: string | number) {
 </script>
 
 <template>
-  <Tabs :value="modelValue" @update:value="onChange">
-    <TabList>
+  <Tabs :value="modelValue" lazy @update:value="onChange">
+    <TabList aria-label="Vacancy sections">
       <Tab value="overview">Overview</Tab>
       <Tab value="candidates">
         <span class="tab">
@@ -38,10 +40,19 @@ function onChange(value: string | number) {
         </span>
       </Tab>
     </TabList>
+    <TabPanels class="tabs__panels">
+      <TabPanel value="overview"><slot name="overview" /></TabPanel>
+      <TabPanel value="candidates"><slot name="candidates" /></TabPanel>
+      <TabPanel value="questions"><slot name="questions" /></TabPanel>
+    </TabPanels>
   </Tabs>
 </template>
 
 <style scoped>
+.tabs__panels {
+  padding: 20px 0 0;
+}
+
 .tab {
   display: inline-flex;
   align-items: center;

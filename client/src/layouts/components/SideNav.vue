@@ -90,8 +90,20 @@ const visibleItems = computed(() =>
     padding: 0 8px;
   }
 
+  .side-nav {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
   .side-nav__list {
+    flex: 1;
     flex-direction: row;
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  .side-nav__item {
+    white-space: nowrap;
   }
 }
 </style>

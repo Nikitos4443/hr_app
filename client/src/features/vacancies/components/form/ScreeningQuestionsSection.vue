@@ -13,7 +13,7 @@ defineProps<{ questions: QuestionList }>()
 <template>
   <FormSection
     title="Screening questions"
-    hint="Candidates answer in order. Use the arrows to change the sequence."
+    hint="Candidates answer in order. Use the arrow buttons on each question to change the sequence."
   >
     <template #aside>
       <Tag
@@ -23,7 +23,10 @@ defineProps<{ questions: QuestionList }>()
       />
     </template>
 
-    <p v-if="!questions.items.value.length" class="empty">No questions yet.</p>
+    <p v-if="!questions.items.value.length" class="empty">
+      No questions yet. Add a video question to see how candidates present themselves, or a text
+      question for short written answers. Screening is optional.
+    </p>
 
     <ScreeningQuestionItem
       v-for="(question, index) in questions.items.value"
