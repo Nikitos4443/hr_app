@@ -3,13 +3,14 @@ import Button from 'primevue/button'
 import { RouterView } from 'vue-router'
 
 import { useSessionStore } from '@/features/auth'
-import { AppLogo, ThemeToggle } from '@/shared/ui'
+import { AppLogo, SkipLink, ThemeToggle } from '@/shared/ui'
 
 const session = useSessionStore()
 </script>
 
 <template>
   <div class="public-layout">
+    <SkipLink />
     <header class="public-layout__header">
       <AppLogo />
       <div class="public-layout__actions">
@@ -20,7 +21,7 @@ const session = useSessionStore()
         <RouterLink v-else :to="{ name: 'auth' }"><Button label="Sign in" /></RouterLink>
       </div>
     </header>
-    <main class="public-layout__main"><RouterView /></main>
+    <main id="main" tabindex="-1" class="public-layout__main"><RouterView /></main>
   </div>
 </template>
 

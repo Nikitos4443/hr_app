@@ -11,14 +11,25 @@
   --p-font-family: var(--font-sans);
 
   /* Score scale (light theme). Thresholds: >= 80 · 50-79 · < 50 */
-  --hr-score-hi: #1f8a4c;
+  --hr-score-hi: var(--p-green-700);
   --hr-score-mid: var(--p-primary-color);
-  --hr-score-lo: #c2410c;
+  --hr-score-lo: var(--p-orange-700);
 }
 
 .app-dark {
-  --hr-score-hi: #6fd39a;
-  --hr-score-lo: #f2b45c;
+  --hr-score-hi: var(--p-green-400);
+  --hr-score-lo: var(--p-orange-400);
+}
+
+/* Reusable keyboard focus ring */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 2px;
+}
+
+/* The main landmark is focused programmatically after navigation; no ring needed. */
+main:focus {
+  outline: none;
 }
 
 html,

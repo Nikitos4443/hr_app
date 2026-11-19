@@ -12,7 +12,7 @@ const { isDark, toggleTheme } = useTheme()
     severity="secondary"
     variant="text"
     rounded
-    aria-label="Toggle theme"
+    :aria-label="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
     @click="toggleTheme"
   />
 </template>

@@ -6,6 +6,6 @@ import { RouterView } from 'vue-router'
 
 <template>
   <RouterView />
-  <Toast position="top-right" />
+  <Toast position="top-right" :breakpoints="{ '480px': { width: 'calc(100vw - 2rem)' } }" />
   <ConfirmDialog />
 </template>

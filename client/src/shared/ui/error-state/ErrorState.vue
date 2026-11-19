@@ -31,8 +31,8 @@ withDefaults(defineProps<{ title: string; description?: string; icon?: string }>
   height: 56px;
   border-radius: 50%;
   font-size: 24px;
-  background: light-dark(#fdecea, #35191a);
-  color: light-dark(#b42318, #ff8f85);
+  background: var(--p-tag-danger-background);
+  color: var(--p-tag-danger-color);
 }
 
 .state__title {
