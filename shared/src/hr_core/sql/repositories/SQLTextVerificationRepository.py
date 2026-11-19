@@ -48,6 +48,12 @@ class SQLTextVerificationRepository(ITextVerificationRepository):
         self.db.refresh(row)
         return TextVerificationModel.model_validate(row)
 
+    def list_by_application(self, application_id: int) -> list[TextVerificationModel]:
+        rows = self.db.scalars(
+            select(TextVerification).where(TextVerification.application_id == application_id)
+        )
+        return [TextVerificationModel.model_validate(row) for row in rows]
+
     def list_done_by_vacancy(self, vacancy_id: int) -> list[TextVerificationModel]:
         rows = self.db.scalars(
             select(TextVerification)

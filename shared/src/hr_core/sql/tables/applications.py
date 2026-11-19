@@ -23,3 +23,4 @@ class Applications(Base):
     screening_invited_at = Column(DateTime(timezone=True), nullable=True)
     rejection_notified_at = Column(DateTime(timezone=True), nullable=True)
     purged_at = Column(DateTime(timezone=True), nullable=True)
+    status_changed_at = Column(DateTime(timezone=True), nullable=True)

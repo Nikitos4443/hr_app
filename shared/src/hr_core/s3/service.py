@@ -56,6 +56,17 @@ class S3Service:
             logging.error(e)
             return None
 
+    def create_presigned_get_url(self, bucket_name, object_name, expiration=300):
+        try:
+            return s3_client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": bucket_name, "Key": object_name},
+                ExpiresIn=expiration,
+            )
+        except ClientError as e:
+            logging.error(e)
+            return None
+
     def get_resume_key(self, application_id):
         return f"{BUCKET_RESUME_PREFIX}{application_id}.pdf"
 

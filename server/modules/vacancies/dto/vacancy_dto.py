@@ -3,6 +3,8 @@ from typing import Literal, Self
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from hr_core.models.vacancy_model import Vacancy
+
 
 def _validate_title(value: str) -> str:
     value = value.strip()
@@ -68,3 +70,30 @@ class UpdateVacancyDTO(_SalaryRangeMixin):
         return None if value is None else _validate_title(value)
 
     _check_deadline = field_validator("deadline_at")(_validate_deadline)
+
+
+class VacancyResponse(Vacancy):
+    applications_count: int = 0
+    questions_count: int = 0
+
+
+class PublicVacancyResponse(BaseModel):
+    """Candidate-facing vacancy: no internal ids, authorship or selection state."""
+
+    id: int
+    title: str
+    company: str
+    company_description: str | None = None
+    company_website: str | None = None
+    location: str | None = None
+    employment_type: str | None = None
+    experience_years_min: int | None = None
+    description: str | None = None
+    responsibilities: list[str] = Field(default_factory=list)
+    requirements: list[str] = Field(default_factory=list)
+    nice_to_have: list[str] = Field(default_factory=list)
+    salary_min: int | None = None
+    salary_max: int | None = None
+    salary_currency: str | None = None
+    status: str
+    deadline_at: datetime | None = None

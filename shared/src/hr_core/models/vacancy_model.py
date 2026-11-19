@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -25,3 +25,9 @@ class Vacancy(BaseModel):
     deadline_at: datetime | None = None
     selection_status: str = "pending"  # pending | running | done | failed
     created_at: datetime | None = None
+
+    def deadline_utc(self) -> datetime | None:
+        # Some backends (SQLite) drop the timezone; stored deadlines are always UTC.
+        if self.deadline_at is not None and self.deadline_at.tzinfo is None:
+            return self.deadline_at.replace(tzinfo=UTC)
+        return self.deadline_at

@@ -7,13 +7,9 @@ from hr_core.repository_interfaces.IResumeVerificationRepository import (
 from modules.flow.errors import ScreeningError
 
 
-def get_answerable_question(
-    application: Application,
-    question_id: int,
-    question_type: str,
-    questions: IQuestionsRepository,
-    resumes: IResumeVerificationRepository,
-) -> Question:
+def ensure_screening_available(
+    application: Application, resumes: IResumeVerificationRepository
+) -> None:
     if application.purged_at is not None:
         raise ScreeningError(410, "Application data was removed")
     if application.status == "rejected":
@@ -24,6 +20,16 @@ def get_answerable_question(
     resume = resumes.get_by_application(application.id)
     if resume is None or resume.status != "done":
         raise ScreeningError(409, "Resume is not processed yet")
+
+
+def get_answerable_question(
+    application: Application,
+    question_id: int,
+    question_type: str,
+    questions: IQuestionsRepository,
+    resumes: IResumeVerificationRepository,
+) -> Question:
+    ensure_screening_available(application, resumes)
 
     question = questions.get_by_id(question_id)
     if (

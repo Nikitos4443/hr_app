@@ -14,3 +14,6 @@ class IEvaluationsRepository(ABC):
 
     @abstractmethod
     def delete_by_application(self, application_id: int) -> None: ...
+
+    @abstractmethod
+    def get_by_application(self, application_id: int) -> Evaluation | None: ...

@@ -4,6 +4,7 @@ from ioc.index import (
     get_applications_service,
     get_resume_service,
     get_s3_service,
+    get_screening_service,
     get_text_service,
     get_video_service,
 )
@@ -16,10 +17,12 @@ from modules.applications.IApplicationService import IApplicationService
 from modules.flow.dependencies import ActiveApplicationDep
 from modules.flow.dto.create_resume_verification_dto import CreateResumeVerificationDTO
 from modules.flow.dto.save_text_answer_dto import SaveTextAnswerDTO
+from modules.flow.dto.screening_dto import ScreeningResponse
 from modules.flow.errors import ScreeningError
 from modules.flow.services.IResumeService import IResumeService
 from modules.flow.services.ITextService import ITextService
 from modules.flow.services.IVideoService import IVideoService
+from modules.flow.services.ScreeningService import ScreeningService
 
 router = APIRouter(prefix="/flow", tags=["flow"])
 
@@ -31,6 +34,7 @@ class FlowRouter:
     resume_service: IResumeService = Depends(get_resume_service)
     video_service: IVideoService = Depends(get_video_service)
     text_service: ITextService = Depends(get_text_service)
+    screening_service: ScreeningService = Depends(get_screening_service)
 
     @router.post("/resume-get-presigned-post-url", status_code=status.HTTP_201_CREATED)
     async def get_resume_presigned_url_and_create_application(self, dto: CreateApplicationDTO):
@@ -39,6 +43,7 @@ class FlowRouter:
 
         presigned_post = self.s3Service.create_presigned_post_url(BUCKET_NAME, s3_key)
         if presigned_post is None:
+            await self.applications_service.delete_application(application.id)
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail="Failed to create resume upload URL",
@@ -49,6 +54,8 @@ class FlowRouter:
                 CreateResumeVerificationDTO(application_id=application.id, status="pending")
             )
         except Exception as e:
+            # Roll back so the candidate is not locked out by the duplicate-email check.
+            await self.applications_service.delete_application(application.id)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to create resume verification",
@@ -56,13 +63,9 @@ class FlowRouter:
 
         return presigned_post
 
-    @router.get("/screening/{token}")
+    @router.get("/screening/{token}", response_model=ScreeningResponse)
     async def get_screening(self, application: ActiveApplicationDep):
-        return {
-            "application_id": application.id,
-            "vacancy_id": application.vacancy_id,
-            "status": application.status,
-        }
+        return self.screening_service.get_view(application)
 
     @router.post(
         "/screening/{token}/questions/{question_id}/video-upload-url",

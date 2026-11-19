@@ -17,6 +17,7 @@ def _to_model(row: Users) -> User:
         password=row.password,
         role=UserRole(row.role),
         company_id=row.company_id,
+        created_at=row.created_at,
     )
 
 

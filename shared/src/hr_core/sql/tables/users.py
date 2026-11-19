@@ -1,4 +1,4 @@
-from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer, String
+from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Integer, String, func
 
 from hr_core.models.user_model import UserRole
 from hr_core.sql.base import Base
@@ -23,3 +23,4 @@ class Users(Base):
         server_default=UserRole.HR.value,
     )
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())

@@ -19,11 +19,12 @@ os.environ["ANALYZER_SCHEDULER_ROLE_ARN"] = "arn:aws:iam::123456789012:role/sche
 import pytest
 from fastapi.testclient import TestClient
 from guard_core.handlers.ratelimit_handler import RateLimitManager
-from ioc.index import get_analyzer_scheduler
+from ioc.index import get_analyzer_scheduler, get_notification_channel, get_s3_service
 from sqlalchemy.pool import StaticPool
 
 from app import fastapi_app as app
 from database.init_db import get_sql_db
+from hr_core.s3.service import S3Service
 from hr_core.sql.session import create_all_tables, create_session_factory
 
 
@@ -71,8 +72,53 @@ def fake_scheduler():
     return FakeScheduler()
 
 
+class FakeChannel:
+    """Collects outgoing e-mails instead of talking to SMTP."""
+
+    def __init__(self):
+        self.sent = []
+        self.fail = False
+
+    def send(self, recipient, subject, body):
+        if self.fail:
+            raise RuntimeError("smtp is down")
+        self.sent.append((recipient, subject, body))
+
+
+class FakeS3(S3Service):
+    """Real key naming, no network."""
+
+    def __init__(self):
+        self.deleted = []
+        self.fail_post = False
+
+    def create_presigned_post_url(self, bucket_name, object_name, **kwargs):
+        if self.fail_post:
+            return None
+        return {"url": f"https://s3.test/{bucket_name}", "fields": {"key": object_name}}
+
+    def create_video_presigned_post_url(self, bucket_name, object_name, expiration=3600):
+        return {"url": f"https://s3.test/{bucket_name}", "fields": {"key": object_name}}
+
+    def create_presigned_get_url(self, bucket_name, object_name, expiration=300):
+        return f"https://s3.test/{bucket_name}/{object_name}?signed"
+
+    def delete_objects(self, bucket_name, keys):
+        self.deleted.extend(keys)
+
+
 @pytest.fixture
-def client(session_factory, fake_scheduler):
+def fake_channel():
+    return FakeChannel()
+
+
+@pytest.fixture
+def fake_s3():
+    return FakeS3()
+
+
+@pytest.fixture
+def client(session_factory, fake_scheduler, fake_channel, fake_s3):
     testing_session = session_factory
 
     def override_get_sql_db():
@@ -84,6 +130,8 @@ def client(session_factory, fake_scheduler):
 
     app.dependency_overrides[get_sql_db] = override_get_sql_db
     app.dependency_overrides[get_analyzer_scheduler] = lambda: fake_scheduler
+    app.dependency_overrides[get_notification_channel] = lambda: fake_channel
+    app.dependency_overrides[get_s3_service] = lambda: fake_s3
     with TestClient(app, client=("127.0.0.1", 50000)) as test_client:
         yield test_client
     app.dependency_overrides.clear()

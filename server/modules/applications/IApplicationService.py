@@ -11,3 +11,7 @@ class IApplicationService(ABC):
 
     @abstractmethod
     async def get_by_screening_token(self, token: str) -> Application | None: ...
+
+    @abstractmethod
+    async def delete_application(self, application_id: int) -> None:
+        """Roll back an application whose resume upload could not be prepared."""
