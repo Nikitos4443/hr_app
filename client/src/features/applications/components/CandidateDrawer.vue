@@ -41,7 +41,7 @@ function onAction(action: ApplicationAction) {
   <Drawer
     v-model:visible="visible"
     position="right"
-    header="Candidate"
+    :header="query.data.value ? candidateName(query.data.value) : 'Candidate'"
     :style="{ width: 'min(900px, 100vw)' }"
   >
     <div v-if="query.isPending.value" class="drawer__loading" role="status">

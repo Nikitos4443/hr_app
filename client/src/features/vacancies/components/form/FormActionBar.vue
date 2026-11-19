@@ -46,9 +46,9 @@ defineEmits<{ cancel: [] }>()
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 24px;
-  border: 1px solid var(--p-content-border-color);
-  border-radius: var(--p-content-border-radius);
+  margin: 0 -32px -32px;
+  padding: 14px 32px;
+  border-top: 1px solid var(--p-content-border-color);
   background: var(--p-content-background);
   box-shadow: 0 -4px 16px color-mix(in srgb, var(--p-text-color) 8%, transparent);
 }
@@ -74,11 +74,14 @@ defineEmits<{ cancel: [] }>()
   margin-left: auto;
 }
 
-@media (max-width: 639px) {
+@media (max-width: 768px) {
   .action-bar {
+    margin: 0 -16px -16px;
     padding: 12px 16px;
   }
+}
 
+@media (max-width: 639px) {
   .action-bar__buttons {
     width: 100%;
   }

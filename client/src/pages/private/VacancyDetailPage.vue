@@ -77,10 +77,11 @@ function selectTab(next: VacancyTabKey) {
         :candidates="counts.data.value?.all"
         :questions="questions.data.value?.length"
         @update:model-value="selectTab"
-      />
-      <VacancyOverviewTab v-if="tab === 'overview'" :vacancy="vacancy.data.value" />
-      <CandidatesPanel v-else-if="tab === 'candidates'" :vacancy-id="vacancy.data.value.id" />
-      <VacancyQuestionsTab v-else :vacancy-id="vacancy.data.value.id" />
+      >
+        <template #overview><VacancyOverviewTab :vacancy="vacancy.data.value" /></template>
+        <template #candidates><CandidatesPanel :vacancy-id="vacancy.data.value.id" /></template>
+        <template #questions><VacancyQuestionsTab :vacancy-id="vacancy.data.value.id" /></template>
+      </VacancyTabs>
     </template>
   </div>
 </template>

@@ -106,6 +106,9 @@ function countErrors(errors: Record<string, string | undefined>) {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.vacancy-form > :deep(section) {
   max-width: 1000px;
 }
 </style>
