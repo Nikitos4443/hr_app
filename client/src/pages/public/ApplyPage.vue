@@ -2,14 +2,15 @@
 import { computed, ref } from 'vue'
 import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { ApplyForm } from '@/features/applications'
 import { isVacancyClosed, usePublicVacancyQuery, VacancyClosedBanner } from '@/features/vacancies'
 import { isApiError } from '@/shared/api'
-import { EmptyState, ErrorState } from '@/shared/ui'
+import { CompanyAvatar, EmptyState, ErrorState } from '@/shared/ui'
 
 const route = useRoute()
+const router = useRouter()
 const vacancyId = computed(() => Number(route.params.vacancyId))
 const query = usePublicVacancyQuery(vacancyId)
 const vacancy = computed(() => query.data.value)
@@ -34,7 +35,9 @@ const submitted = ref(false)
       icon="pi pi-search"
       title="Vacancy not found"
       description="The link may be outdated or the vacancy was removed."
-    />
+    >
+      <Button label="Go back" icon="pi pi-arrow-left" severity="secondary" @click="router.back()" />
+    </EmptyState>
 
     <ErrorState
       v-else-if="query.isError.value"
@@ -46,7 +49,7 @@ const submitted = ref(false)
 
     <template v-else-if="vacancy">
       <header class="apply__head">
-        <span class="apply__avatar" aria-hidden="true">{{ vacancy.company.slice(0, 2) }}</span>
+        <CompanyAvatar :name="vacancy.company" :size="40" />
         <div>
           <div class="apply__company">{{ vacancy.company }}</div>
           <div class="apply__title">{{ vacancy.title }}</div>
@@ -104,19 +107,6 @@ const submitted = ref(false)
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.apply__avatar {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--p-content-border-radius);
-  background: var(--p-highlight-background);
-  color: var(--p-highlight-color);
-  font-weight: 700;
-  text-transform: uppercase;
 }
 
 .apply__company {

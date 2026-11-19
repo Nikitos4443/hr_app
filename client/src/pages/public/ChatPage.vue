@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { ChatWindow } from '@/features/ai-chat'
 import { usePublicVacancyQuery } from '@/features/vacancies'
@@ -10,6 +10,7 @@ import { isApiError } from '@/shared/api'
 import { EmptyState } from '@/shared/ui'
 
 const route = useRoute()
+const router = useRouter()
 const vacancyId = computed(() => Number(route.params.vacancyId))
 const query = usePublicVacancyQuery(vacancyId)
 const company = computed(() => query.data.value?.company ?? null)
@@ -47,7 +48,9 @@ const notFound = computed(() => isApiError(query.error.value) && query.error.val
       icon="pi pi-search"
       title="Vacancy not found"
       description="The link may be outdated or the vacancy was removed."
-    />
+    >
+      <Button label="Go back" icon="pi pi-arrow-left" severity="secondary" @click="router.back()" />
+    </EmptyState>
 
     <ChatWindow v-else :key="vacancyId" :vacancy-id="vacancyId" :company="company" />
   </div>

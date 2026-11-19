@@ -45,18 +45,18 @@ withDefaults(
 }
 
 .end-card__icon--success {
-  background: color-mix(in srgb, var(--p-green-500) 16%, transparent);
-  color: var(--p-green-500);
+  background: var(--p-tag-success-background);
+  color: var(--p-tag-success-color);
 }
 
 .end-card__icon--warn {
-  background: color-mix(in srgb, var(--p-orange-500) 16%, transparent);
-  color: var(--p-orange-500);
+  background: var(--p-tag-warn-background);
+  color: var(--p-tag-warn-color);
 }
 
 .end-card__icon--info {
-  background: color-mix(in srgb, var(--p-blue-500) 16%, transparent);
-  color: var(--p-blue-500);
+  background: var(--p-tag-info-background);
+  color: var(--p-tag-info-color);
 }
 
 .end-card__icon--primary {

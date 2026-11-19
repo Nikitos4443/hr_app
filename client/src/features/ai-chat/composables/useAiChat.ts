@@ -108,9 +108,6 @@ export function useAiChat(vacancyId: MaybeRefOrGetter<number>) {
     else connect()
   }
 
-  function dismissError() {
-    error.value = null
-  }
 
   onMounted(connect)
   onUnmounted(disconnect)
@@ -125,6 +122,5 @@ export function useAiChat(vacancyId: MaybeRefOrGetter<number>) {
     canSend,
     send,
     retry,
-    dismissError,
   }
 }

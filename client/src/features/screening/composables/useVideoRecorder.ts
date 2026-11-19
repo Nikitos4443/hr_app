@@ -57,7 +57,7 @@ export function useVideoRecorder(maxDurationSec: MaybeRefOrGetter<number>) {
     state.value = 'denied'
   }
 
-  async function requestCamera() {
+  async function requestCamera(autoStart = false) {
     problem.value = null
     fileProblem.value = null
     if (!window.isSecureContext) return fail('insecure')
@@ -71,6 +71,7 @@ export function useVideoRecorder(maxDurationSec: MaybeRefOrGetter<number>) {
         audio: true,
       })
       state.value = 'ready'
+      if (autoStart) startRecording()
     } catch (error) {
       fail(problemFromError(error))
     }

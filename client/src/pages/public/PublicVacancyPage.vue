@@ -38,7 +38,9 @@ function openChat() {
     icon="pi pi-search"
     title="Vacancy not found"
     description="The link may be outdated or the vacancy was removed."
-  />
+  >
+    <Button label="Go back" icon="pi pi-arrow-left" severity="secondary" @click="router.back()" />
+  </EmptyState>
 
   <ErrorState
     v-else-if="query.isError.value"

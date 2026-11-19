@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { initials } from '@/shared/utils/format'
+import { CompanyAvatar } from '@/shared/ui'
 
 import type { Company } from '../types/company'
 
@@ -22,7 +22,7 @@ const host = computed(() => {
   <section class="preview">
     <span class="preview__label">How candidates see it</span>
     <div class="preview__head">
-      <span class="preview__logo" aria-hidden="true">{{ initials(company.name) }}</span>
+      <CompanyAvatar :name="company.name" />
       <div class="preview__name">
         <strong>{{ company.name }}</strong>
         <a
@@ -64,18 +64,6 @@ const host = computed(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.preview__logo {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  font-weight: 600;
-  background: var(--p-highlight-background);
-  color: var(--p-highlight-color);
 }
 
 .preview__name {

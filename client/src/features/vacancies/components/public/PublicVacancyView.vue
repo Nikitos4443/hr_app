@@ -3,6 +3,8 @@ import { computed } from 'vue'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 
+import { CompanyAvatar } from '@/shared/ui'
+
 import {
   daysLeft,
   formatDate,
@@ -44,7 +46,7 @@ const sections = computed(() =>
   <article class="vacancy">
     <header class="vacancy__head">
       <div class="vacancy__company">
-        <span class="vacancy__avatar" aria-hidden="true">{{ vacancy.company.slice(0, 2) }}</span>
+        <CompanyAvatar :name="vacancy.company" />
         <div>
           <div class="vacancy__company-name">{{ vacancy.company }}</div>
           <a
@@ -111,8 +113,15 @@ const sections = computed(() =>
     </section>
 
     <footer class="vacancy__cta">
-      <Button v-if="!closed" label="Apply" icon="pi pi-send" size="large" @click="emit('apply')" />
-      <p v-else class="vacancy__closed-note">
+      <Button
+        label="Apply"
+        icon="pi pi-send"
+        size="large"
+        :disabled="closed"
+        :aria-describedby="closed ? 'vacancy-closed-note' : undefined"
+        @click="emit('apply')"
+      />
+      <p v-if="closed" id="vacancy-closed-note" class="vacancy__closed-note">
         Applications for this vacancy are no longer accepted.
       </p>
       <Button
@@ -147,18 +156,6 @@ const sections = computed(() =>
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.vacancy__avatar {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--p-content-border-radius);
-  background: var(--p-highlight-background);
-  color: var(--p-highlight-color);
-  font-weight: 700;
-  text-transform: uppercase;
 }
 
 .vacancy__company-name {

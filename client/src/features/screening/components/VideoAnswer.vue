@@ -28,6 +28,8 @@ const maxDuration = computed(
 const recorder = useVideoRecorder(maxDuration)
 const upload = useUploadVideoAnswerMutation(() => props.token)
 
+const fromFile = ref(false)
+const durationProblem = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadPercent = ref(0)
 const showUpload = ref(false)
@@ -43,6 +45,7 @@ const showPreview = computed(() =>
 )
 
 const problemText = computed(() => {
+  if (durationProblem.value) return durationProblem.value
   if (recorder.fileProblem.value === 'not-video') return 'Please choose a video file.'
   if (recorder.problem.value === 'too-large') {
     return `This video is larger than ${maxFileMb} MB. Record a shorter answer or upload a smaller file.`
@@ -54,11 +57,44 @@ function pickFile() {
   fileInput.value?.click()
 }
 
-function onFileChange(event: Event) {
+// Reads the duration from the file metadata; null when the browser cannot tell.
+function readDuration(file: File): Promise<number | null> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file)
+    const probe = document.createElement('video')
+    const done = (value: number | null) => {
+      URL.revokeObjectURL(url)
+      probe.removeAttribute('src')
+      resolve(value)
+    }
+    probe.preload = 'metadata'
+    probe.onloadedmetadata = () => done(Number.isFinite(probe.duration) ? probe.duration : null)
+    probe.onerror = () => done(null)
+    probe.src = url
+  })
+}
+
+async function onFileChange(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   input.value = ''
-  if (file) recorder.useFile(file)
+  if (!file) return
+  durationProblem.value = null
+  if (file.type.startsWith('video/')) {
+    const duration = await readDuration(file)
+    if (duration !== null && duration > maxDuration.value + 1) {
+      durationProblem.value = `This video is ${formatClock(Math.ceil(duration))} long, but the limit for this answer is ${formatClock(maxDuration.value)}. Please choose a shorter video.`
+      return
+    }
+  }
+  recorder.useFile(file)
+  fromFile.value = recorder.state.value === 'review'
+}
+
+function allowAndStart() {
+  durationProblem.value = null
+  fromFile.value = false
+  return recorder.requestCamera(true)
 }
 
 function send() {
@@ -95,6 +131,7 @@ function backToReview() {
 
 async function retake() {
   backToReview()
+  fromFile.value = false
   await recorder.retake()
 }
 </script>
@@ -131,6 +168,7 @@ async function retake() {
         :elapsed-label="formatClock(recorder.elapsedSec.value)"
         :limit-label="formatClock(maxDuration)"
         caption="Camera is not on yet"
+        review-caption="Subtitles appear after sending"
       />
 
       <div v-if="isRecording" class="video-answer__timer">
@@ -157,7 +195,8 @@ async function retake() {
         severity="success"
         icon="pi pi-check-circle"
       >
-        Recording is ready
+        <template v-if="fromFile">Video selected</template>
+        <template v-else>Recording is ready</template>
         <template v-if="recorder.blob.value"
           >({{ formatMegabytes(recorder.blob.value.size) }})</template
         >. Watch it or record it again.
@@ -166,7 +205,7 @@ async function retake() {
       <RecordControls
         :state="recorder.state.value"
         :max-file-mb="maxFileMb"
-        @allow="recorder.requestCamera"
+        @allow="allowAndStart"
         @record="recorder.startRecording"
         @stop="recorder.stopRecording"
         @send="send"
