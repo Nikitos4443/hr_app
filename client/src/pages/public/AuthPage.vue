@@ -22,9 +22,10 @@ const subheading = computed(() =>
           <h1 class="auth-card__title">{{ heading }}</h1>
           <p class="auth-card__subtitle">{{ subheading }}</p>
         </div>
-        <AuthTabs v-model="mode" />
-        <LoginForm v-if="mode === 'login'" />
-        <RegisterForm v-else />
+        <AuthTabs v-model="mode">
+          <template #login><LoginForm /></template>
+          <template #register><RegisterForm /></template>
+        </AuthTabs>
       </div>
     </template>
   </Card>

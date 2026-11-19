@@ -57,7 +57,7 @@ export function useAiChat(vacancyId: MaybeRefOrGetter<number>) {
       botTyping.value = false
       messages.value.push({ id: nextId++, role: 'bot', text: payload.text })
     })
-    target.on('chat_error', (payload) => {
+    target.on('chat_error', () => {
       botTyping.value = false
       error.value = FRIENDLY_ERROR
     })

@@ -23,7 +23,9 @@ const showHrChrome = computed(() => route.name === 'home' || route.name === 'for
         <RouterLink v-if="showHrChrome && session.isAuthenticated" :to="{ name: 'vacancies' }">
           <Button label="Open app" />
         </RouterLink>
-        <RouterLink v-else-if="showHrChrome" :to="{ name: 'auth' }"><Button label="Sign in" /></RouterLink>
+        <RouterLink v-else-if="showHrChrome" :to="{ name: 'auth' }"
+          ><Button label="Sign in"
+        /></RouterLink>
       </div>
     </header>
     <main id="main" tabindex="-1" class="public-layout__main"><RouterView /></main>
