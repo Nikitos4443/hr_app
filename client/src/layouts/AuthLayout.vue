@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 
-import { AppLogo, ThemeToggle } from '@/shared/ui'
+import { AppLogo, SkipLink, ThemeToggle } from '@/shared/ui'
 </script>
 
 <template>
   <div class="auth-layout">
+    <SkipLink />
     <div class="auth-layout__theme"><ThemeToggle /></div>
     <AppLogo />
-    <main class="auth-layout__main"><RouterView /></main>
+    <main id="main" tabindex="-1" class="auth-layout__main"><RouterView /></main>
   </div>
 </template>
 

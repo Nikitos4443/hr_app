@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 
-import { AppLogo, ThemeToggle } from '@/shared/ui'
+import { AppLogo, SkipLink, ThemeToggle } from '@/shared/ui'
 </script>
 
 <template>
   <div class="candidate-layout">
+    <SkipLink />
     <header class="candidate-layout__header">
       <AppLogo />
       <ThemeToggle />
     </header>
-    <main class="candidate-layout__main"><RouterView /></main>
+    <main id="main" tabindex="-1" class="candidate-layout__main"><RouterView /></main>
   </div>
 </template>
 
