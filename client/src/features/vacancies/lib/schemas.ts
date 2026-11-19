@@ -1,6 +1,9 @@
 import { z } from 'zod'
 
 export const MIN_VIDEO_DURATION_SEC = 10
+export const MAX_VIDEO_DURATION_SEC = 600
+export const MAX_QUESTION_TEXT_LENGTH = 2000
+export const MAX_QUESTIONS = 50
 export const MAX_TEXT_ANSWER_LENGTH = 5000
 export const DEFAULT_VIDEO_DURATION_SEC = 120
 
@@ -45,18 +48,25 @@ export function createVacancySchema(unchangedDeadline: number | null) {
 
 export type VacancyFormValues = z.infer<ReturnType<typeof createVacancySchema>>
 
+const questionText = z
+  .string()
+  .trim()
+  .min(1, 'Enter the question')
+  .max(MAX_QUESTION_TEXT_LENGTH, `At most ${MAX_QUESTION_TEXT_LENGTH} characters`)
+
 export const screeningQuestionSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('video'),
-    text: z.string().trim().min(1, 'Enter the question'),
+    text: questionText,
     max_duration_sec: z
       .number({ error: 'Enter a duration' })
       .int()
-      .min(MIN_VIDEO_DURATION_SEC, `At least ${MIN_VIDEO_DURATION_SEC} seconds`),
+      .min(MIN_VIDEO_DURATION_SEC, `At least ${MIN_VIDEO_DURATION_SEC} seconds`)
+      .max(MAX_VIDEO_DURATION_SEC, `At most ${MAX_VIDEO_DURATION_SEC} seconds`),
   }),
   z.object({
     type: z.literal('text'),
-    text: z.string().trim().min(1, 'Enter the question'),
+    text: questionText,
     max_length: z.number().int().max(MAX_TEXT_ANSWER_LENGTH),
   }),
 ])

@@ -2,6 +2,7 @@
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 
+import { MAX_QUESTIONS } from '../../lib/schemas'
 import type { QuestionList } from '../../composables/useQuestionList'
 import FormSection from './FormSection.vue'
 import ScreeningQuestionItem from './ScreeningQuestionItem.vue'
@@ -40,17 +41,23 @@ defineProps<{ questions: QuestionList }>()
       @blur="questions.validateOne(question.id)"
     />
 
+    <p v-if="!questions.canAdd.value" class="empty">
+      Maximum of {{ MAX_QUESTIONS }} questions reached.
+    </p>
+
     <div class="actions">
       <Button
         label="Add video question"
         icon="pi pi-video"
         severity="secondary"
+        :disabled="!questions.canAdd.value"
         @click="questions.add('video')"
       />
       <Button
         label="Add text question"
         icon="pi pi-align-left"
         severity="secondary"
+        :disabled="!questions.canAdd.value"
         @click="questions.add('text')"
       />
     </div>
