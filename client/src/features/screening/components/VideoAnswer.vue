@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import Message from 'primevue/message'
 import ProgressBar from 'primevue/progressbar'
 
@@ -31,6 +31,7 @@ const upload = useUploadVideoAnswerMutation(() => props.token)
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadPercent = ref(0)
 const showUpload = ref(false)
+let uploadController: AbortController | null = null
 
 const maxFileMb = Math.round(MAX_VIDEO_SIZE_BYTES / (1024 * 1024))
 const isRecording = computed(() => recorder.state.value === 'recording')
@@ -41,11 +42,13 @@ const showPreview = computed(() =>
   ['idle', 'ready', 'recording', 'review'].includes(recorder.state.value),
 )
 
-const problemText = computed(() =>
-  recorder.problem.value === 'too-large'
-    ? `This video is larger than ${maxFileMb} MB. Record a shorter answer or upload a smaller file.`
-    : '',
-)
+const problemText = computed(() => {
+  if (recorder.fileProblem.value === 'not-video') return 'Please choose a video file.'
+  if (recorder.problem.value === 'too-large') {
+    return `This video is larger than ${maxFileMb} MB. Record a shorter answer or upload a smaller file.`
+  }
+  return ''
+})
 
 function pickFile() {
   fileInput.value?.click()
@@ -63,10 +66,12 @@ function send() {
   if (!video) return
   uploadPercent.value = 0
   showUpload.value = true
+  uploadController = new AbortController()
   upload.mutate(
     {
       questionId: props.question.id,
       video,
+      signal: uploadController.signal,
       onProgress: (percent) => {
         uploadPercent.value = percent
       },
@@ -74,6 +79,14 @@ function send() {
     { onSuccess: () => emit('answered') },
   )
 }
+
+function cancelUpload() {
+  uploadController?.abort()
+  uploadController = null
+  backToReview()
+}
+
+onBeforeUnmount(() => uploadController?.abort())
 
 function backToReview() {
   upload.reset()
@@ -97,6 +110,7 @@ async function retake() {
       :error-text="errorMessage(upload.error.value, 'Could not upload the video.')"
       @retry="send"
       @back="backToReview"
+      @cancel="cancelUpload"
     />
 
     <template v-else>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Button from 'primevue/button'
-import ProgressSpinner from 'primevue/progressspinner'
+import Skeleton from 'primevue/skeleton'
 import Tag from 'primevue/tag'
 
 import {
@@ -10,6 +10,7 @@ import {
   ScreeningProgress,
   TextAnswer,
   VideoAnswer,
+  formatLimit,
   useScreeningFlow,
 } from '@/features/screening'
 import { ErrorState } from '@/shared/ui'
@@ -18,12 +19,36 @@ const route = useRoute()
 const token = computed(() => String(route.params.token ?? ''))
 
 const flow = useScreeningFlow(token)
+
+const heading = ref<HTMLElement | null>(null)
+const questionTag = computed(() => {
+  const question = flow.current.value
+  if (!question) return ''
+  if (question.type !== 'video') return 'Text answer'
+  return question.video_max_duration_sec
+    ? `Video answer · up to ${formatLimit(question.video_max_duration_sec)}`
+    : 'Video answer'
+})
+
+// Move focus to the new question and start from the top when the question changes.
+watch(
+  () => flow.current.value?.id,
+  (id, previous) => {
+    if (id == null || previous == null) return
+    window.scrollTo({ top: 0 })
+    nextTick(() => heading.value?.focus({ preventScroll: true }))
+  },
+)
 </script>
 
 <template>
   <div class="screening">
-    <div v-if="flow.isLoading.value" class="screening__loading">
-      <ProgressSpinner aria-label="Loading screening" />
+    <div v-if="flow.isLoading.value" class="screening__loading" role="status" aria-busy="true">
+      <span class="visually-hidden">Loading the screening...</span>
+      <Skeleton height="6px" />
+      <Skeleton width="40%" height="24px" />
+      <Skeleton height="64px" />
+      <Skeleton height="200px" />
     </div>
 
     <ScreeningEndState
@@ -64,9 +89,9 @@ const flow = useScreeningFlow(token)
         <Tag
           severity="secondary"
           :icon="flow.current.value.type === 'video' ? 'pi pi-video' : 'pi pi-align-left'"
-          :value="flow.current.value.type === 'video' ? 'Video answer' : 'Text answer'"
+          :value="questionTag"
         />
-        <h1 class="screening__title">{{ flow.current.value.text }}</h1>
+        <h1 ref="heading" class="screening__title" tabindex="-1">{{ flow.current.value.text }}</h1>
       </div>
 
       <VideoAnswer
@@ -93,13 +118,24 @@ const flow = useScreeningFlow(token)
   flex-direction: column;
   gap: 20px;
   max-width: 560px;
+  width: 100%;
   margin: 0 auto;
 }
 
 .screening__loading {
-  display: grid;
-  place-items: center;
-  padding: 64px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .screening__header {
@@ -123,6 +159,10 @@ const flow = useScreeningFlow(token)
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
+}
+
+.screening__title:focus {
+  outline: none;
 }
 
 .screening__title {

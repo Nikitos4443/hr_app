@@ -92,4 +92,16 @@ const emit = defineEmits<{
   flex-direction: column;
   gap: 8px;
 }
+
+@media (max-width: 600px) {
+  .controls {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    margin: 0 -16px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--p-content-border-color);
+    background: var(--p-content-background);
+  }
+}
 </style>

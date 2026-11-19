@@ -5,6 +5,7 @@ import { useCountdown } from './useCountdown'
 
 export type RecorderState = 'idle' | 'denied' | 'ready' | 'recording' | 'review'
 export type RecorderProblem = 'denied' | 'no-camera' | 'insecure' | 'unsupported' | 'too-large'
+export type FileProblem = 'not-video'
 
 const MIME_CANDIDATES = [
   'video/webm;codecs=vp9,opus',
@@ -29,6 +30,7 @@ function problemFromError(error: unknown): RecorderProblem {
 export function useVideoRecorder(maxDurationSec: MaybeRefOrGetter<number>) {
   const state = ref<RecorderState>('idle')
   const problem = ref<RecorderProblem | null>(null)
+  const fileProblem = ref<FileProblem | null>(null)
   const stream = shallowRef<MediaStream | null>(null)
   const blob = shallowRef<Blob | null>(null)
   const previewUrl = ref<string | null>(null)
@@ -57,6 +59,7 @@ export function useVideoRecorder(maxDurationSec: MaybeRefOrGetter<number>) {
 
   async function requestCamera() {
     problem.value = null
+    fileProblem.value = null
     if (!window.isSecureContext) return fail('insecure')
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
       return fail('unsupported')
@@ -121,7 +124,11 @@ export function useVideoRecorder(maxDurationSec: MaybeRefOrGetter<number>) {
   }
 
   function useFile(file: File) {
-    if (!file.type.startsWith('video/')) return fail('unsupported')
+    if (!file.type.startsWith('video/')) {
+      fileProblem.value = 'not-video'
+      return
+    }
+    fileProblem.value = null
     countdown.reset()
     finalize(file, file.name)
   }
@@ -135,6 +142,7 @@ export function useVideoRecorder(maxDurationSec: MaybeRefOrGetter<number>) {
 
   function dismissProblem() {
     problem.value = null
+    fileProblem.value = null
     if (state.value === 'denied') state.value = 'idle'
   }
 
@@ -151,6 +159,7 @@ export function useVideoRecorder(maxDurationSec: MaybeRefOrGetter<number>) {
   return {
     state,
     problem,
+    fileProblem,
     stream,
     blob,
     previewUrl,

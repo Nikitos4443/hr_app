@@ -45,17 +45,17 @@ const fixedHeight = computed(() => route.name === 'chat')
 }
 
 .candidate-layout__main {
-  display: flex;
   flex: 1;
-  flex-direction: column;
   width: 100%;
-  min-height: 0;
   max-width: 880px;
   margin: 0 auto;
   padding: 0 16px 48px;
 }
 
 .candidate-layout--fixed .candidate-layout__main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
 }
 </style>
