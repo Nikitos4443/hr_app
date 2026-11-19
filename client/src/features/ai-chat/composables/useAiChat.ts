@@ -3,6 +3,9 @@ import { computed, onMounted, onUnmounted, ref, toValue, type MaybeRefOrGetter }
 import { createChatSocket, type ChatSocket } from '../api/chat.socket'
 import type { ChatMessage, ConnectionState } from '../types/chat'
 
+const FRIENDLY_ERROR = 'Something went wrong while answering. Please try again.'
+const CONNECTION_ERROR = 'Could not reach the assistant. Check your connection and try again.'
+
 export function useAiChat(vacancyId: MaybeRefOrGetter<number>) {
   const messages = ref<ChatMessage[]>([])
   const connection = ref<ConnectionState>('connecting')
@@ -13,6 +16,7 @@ export function useAiChat(vacancyId: MaybeRefOrGetter<number>) {
 
   let socket: ChatSocket | null = null
   let nextId = 1
+  let pendingText: string | null = null
 
   const canSend = computed(
     () => connection.value === 'connected' && ready.value && !botTyping.value,
@@ -39,11 +43,12 @@ export function useAiChat(vacancyId: MaybeRefOrGetter<number>) {
     })
     target.on('connect_error', () => {
       connection.value = target.active ? 'reconnecting' : 'disconnected'
-      error.value = 'Could not reach the assistant.'
+      error.value = CONNECTION_ERROR
     })
     target.on('chat_started', (payload) => {
       vacancyTitle.value = payload.title
       ready.value = true
+      resendPending()
     })
     target.on('bot_typing', () => {
       botTyping.value = true
@@ -54,7 +59,7 @@ export function useAiChat(vacancyId: MaybeRefOrGetter<number>) {
     })
     target.on('chat_error', (payload) => {
       botTyping.value = false
-      error.value = payload.error
+      error.value = FRIENDLY_ERROR
     })
   }
 
@@ -83,9 +88,23 @@ export function useAiChat(vacancyId: MaybeRefOrGetter<number>) {
     return true
   }
 
+  function resendPending() {
+    if (!pendingText || !socket) return
+    const text = pendingText
+    pendingText = null
+    botTyping.value = true
+    socket.emit('msg_event', { text })
+  }
+
+  // Re-sends the last user message when it never got an answer, otherwise restarts the chat.
   function retry() {
     error.value = null
-    if (socket?.connected) startChat()
+    const last = messages.value[messages.value.length - 1]
+    pendingText = last?.role === 'user' ? last.text : null
+    if (socket?.connected && ready.value) {
+      if (pendingText) resendPending()
+      else startChat()
+    } else if (socket?.connected) startChat()
     else connect()
   }
 

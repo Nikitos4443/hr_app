@@ -31,6 +31,7 @@ const suggestions = [
         variant="outlined"
         rounded
         size="small"
+        class="greeting__chip"
         :disabled="disabled"
         @click="emit('suggest', text)"
       />
@@ -58,6 +59,10 @@ const suggestions = [
   margin: 4px 0 0;
   color: var(--p-text-muted-color);
   font-size: 13px;
+}
+
+.greeting__chip {
+  min-height: 44px;
 }
 
 .greeting__chips {

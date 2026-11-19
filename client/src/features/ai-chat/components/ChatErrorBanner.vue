@@ -10,7 +10,7 @@ const emit = defineEmits<{ retry: [] }>()
   <div class="error-banner" role="alert">
     <i class="pi pi-exclamation-circle error-banner__icon" aria-hidden="true" />
     <div class="error-banner__body">
-      <strong>The assistant is unavailable</strong>
+      <strong>The assistant did not respond</strong>
       <span class="error-banner__text">{{ message }}</span>
     </div>
     <Button

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, watch } from 'vue'
 import { Form, type FormSubmitEvent } from '@primevue/forms'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -13,8 +14,22 @@ import ApplySuccess from './ApplySuccess.vue'
 import ResumeDropzone from './ResumeDropzone.vue'
 
 const props = defineProps<{ vacancyId: number }>()
+const emit = defineEmits<{ success: [] }>()
 
 const form = useApplyForm(() => props.vacancyId)
+
+watch(
+  () => form.status.value,
+  (status) => {
+    if (status === 'success') emit('success')
+  },
+)
+
+// Announce upload progress in coarse steps so screen readers are not flooded.
+const progressAnnouncement = computed(() => {
+  const step = Math.min(100, Math.floor(form.percent.value / 25) * 25)
+  return `Uploading your application, ${step}%`
+})
 
 function onSubmit({ valid, values }: FormSubmitEvent) {
   form.submit(values as { email?: string }, valid)
@@ -24,7 +39,8 @@ function onSubmit({ valid, values }: FormSubmitEvent) {
 <template>
   <ApplySuccess v-if="form.status.value === 'success'" :email="form.email.value" />
 
-  <div v-else-if="form.status.value === 'uploading'" class="apply-progress" aria-live="polite">
+  <div v-else-if="form.status.value === 'uploading'" class="apply-progress">
+    <p class="visually-hidden" role="status">{{ progressAnnouncement }}</p>
     <div class="apply-progress__head">
       <h2>Sending your application...</h2>
       <p>Please keep this page open until the upload finishes.</p>
@@ -38,7 +54,7 @@ function onSubmit({ valid, values }: FormSubmitEvent) {
       <span class="apply-progress__name">{{ form.resume.value.name }}</span>
       <span class="apply-progress__size">{{ formatFileSize(form.resume.value.size) }}</span>
     </div>
-    <ProgressBar :value="form.percent.value" />
+    <ProgressBar :value="form.percent.value" aria-label="Resume upload progress" />
   </div>
 
   <Form
@@ -73,12 +89,15 @@ function onSubmit({ valid, values }: FormSubmitEvent) {
       </FormItem>
 
       <FormItem label="Resume (PDF)" required :error="form.resumeError.value ?? undefined">
-        <ResumeDropzone
-          :file="form.resume.value"
-          :invalid="!!form.resumeError.value"
-          @select="form.selectResume"
-          @remove="form.removeResume"
-        />
+        <template #default="{ describedby, invalid }">
+          <ResumeDropzone
+            :file="form.resume.value"
+            :invalid="invalid"
+            :described-by="describedby"
+            @select="form.selectResume"
+            @remove="form.removeResume"
+          />
+        </template>
       </FormItem>
 
       <p class="apply-form__privacy">
@@ -87,16 +106,15 @@ function onSubmit({ valid, values }: FormSubmitEvent) {
         final decision is made by a person.
       </p>
 
-      <Button
-        v-if="form.status.value === 'error'"
-        type="button"
-        label="Try again"
-        icon="pi pi-refresh"
-        size="large"
-        fluid
-        @click="form.retry"
-      />
-      <Button v-else type="submit" label="Submit application" size="large" fluid />
+      <div class="apply-form__actions">
+        <Button
+          type="submit"
+          :label="form.status.value === 'error' ? 'Try again' : 'Submit application'"
+          :icon="form.status.value === 'error' ? 'pi pi-refresh' : undefined"
+          size="large"
+          fluid
+        />
+      </div>
     </template>
   </Form>
 </template>
@@ -118,6 +136,32 @@ function onSubmit({ valid, values }: FormSubmitEvent) {
 
 .apply-form__privacy i {
   margin-top: 3px;
+}
+
+.apply-form__actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .apply-form__actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    margin: 0 -16px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--p-content-border-color);
+    background: var(--p-content-background);
+  }
 }
 
 .apply-progress {

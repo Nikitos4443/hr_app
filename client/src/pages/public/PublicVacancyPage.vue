@@ -25,7 +25,8 @@ function openChat() {
 </script>
 
 <template>
-  <div v-if="query.isPending.value" class="page-skeleton" aria-busy="true">
+  <div v-if="query.isPending.value" class="page-skeleton" role="status" aria-busy="true">
+    <span class="visually-hidden">Loading the vacancy...</span>
     <Skeleton width="40%" height="44px" />
     <Skeleton width="80%" height="36px" />
     <Skeleton height="120px" />
@@ -56,6 +57,15 @@ function openChat() {
 </template>
 
 <style scoped>
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .page-skeleton {
   display: flex;
   flex-direction: column;
