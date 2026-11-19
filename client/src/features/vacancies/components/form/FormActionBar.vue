@@ -73,4 +73,18 @@ defineEmits<{ cancel: [] }>()
   gap: 8px;
   margin-left: auto;
 }
+
+@media (max-width: 639px) {
+  .action-bar {
+    padding: 12px 16px;
+  }
+
+  .action-bar__buttons {
+    width: 100%;
+  }
+
+  .action-bar__buttons > * {
+    flex: 1;
+  }
+}
 </style>

@@ -39,7 +39,7 @@ function rowClass(row: ApplicationListItem) {
 </script>
 
 <template>
-  <div class="table-card">
+  <div class="table-card focus-ring" tabindex="0" role="region" aria-label="Candidates table">
     <DataTable
       :value="rows"
       data-key="id"

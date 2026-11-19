@@ -5,7 +5,7 @@ import DataTable from 'primevue/datatable'
 import Tag from 'primevue/tag'
 
 import { ROLE_LABEL } from '@/features/auth'
-import { initials } from '@/shared/utils/format'
+import { formatDate, initials } from '@/shared/utils/format'
 
 import { useDeleteUser } from '../composables/useDeleteUser'
 import type { User } from '../types/user'
@@ -37,17 +37,31 @@ const { requestDelete, isPending } = useDeleteUser()
         />
       </template>
     </Column>
+    <Column v-if="users.some((user) => user.created_at)" header="Added">
+      <template #body="{ data }: { data: User }">
+        <time v-if="data.created_at" :datetime="data.created_at">
+          {{ formatDate(data.created_at) }}
+        </time>
+        <span v-else>—</span>
+      </template>
+    </Column>
     <Column header="Actions" header-class="users-table__actions-head" style="width: 72px">
       <template #body="{ data }: { data: User }">
-        <Button
-          icon="pi pi-trash"
-          severity="secondary"
-          text
-          rounded
-          :aria-label="`Delete user ${data.username}`"
-          :disabled="data.id === currentUserId || isPending"
-          @click="requestDelete(data)"
-        />
+        <span :title="data.id === currentUserId ? 'You cannot delete your own account' : undefined">
+          <Button
+            icon="pi pi-trash"
+            severity="secondary"
+            text
+            rounded
+            :aria-label="
+              data.id === currentUserId
+                ? `Delete user ${data.username} (unavailable: this is your own account)`
+                : `Delete user ${data.username}`
+            "
+            :disabled="data.id === currentUserId || isPending"
+            @click="requestDelete(data)"
+          />
+        </span>
       </template>
     </Column>
   </DataTable>
@@ -76,6 +90,8 @@ const { requestDelete, isPending } = useDeleteUser()
 .users-table__name {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .users-table__me {

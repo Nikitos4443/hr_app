@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { watch } from 'vue'
 import { Form } from '@primevue/forms'
 import Message from 'primevue/message'
 
@@ -14,6 +15,7 @@ import ScreeningQuestionsSection from './form/ScreeningQuestionsSection.vue'
 import VacancyBasicsSection from './form/VacancyBasicsSection.vue'
 
 const props = defineProps<{ vacancy?: Vacancy }>()
+const emit = defineEmits<{ 'dirty-change': [dirty: boolean] }>()
 
 const {
   isEdit,
@@ -31,6 +33,8 @@ const {
   submit,
   cancel,
 } = useVacancyForm(props.vacancy)
+
+watch(isDirty, (dirty) => emit('dirty-change', dirty), { immediate: true })
 
 const employmentOptions = employmentTypeOptions(initialValues.employment_type)
 const currencies = currencyOptions(initialValues.salary_currency)

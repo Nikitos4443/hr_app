@@ -21,11 +21,11 @@ defineProps<{
           name="salary_min"
           input-id="salary-min"
           :min="0"
-          :invalid="Boolean(errors.salary_max)"
+          :invalid="Boolean(errors.salary_min)"
           fluid
         />
       </FormItem>
-      <FormItem label="Maximum" for="salary-max">
+      <FormItem label="Maximum" for="salary-max" :error="errors.salary_max">
         <InputNumber
           name="salary_max"
           input-id="salary-max"
@@ -47,10 +47,6 @@ defineProps<{
         />
       </FormItem>
     </div>
-    <small v-if="errors.salary_max" class="error" role="alert">
-      <i class="pi pi-exclamation-circle" aria-hidden="true" />
-      {{ errors.salary_max }}
-    </small>
   </FormSection>
 </template>
 
@@ -59,12 +55,5 @@ defineProps<{
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
-}
-
-.error {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--p-form-field-invalid-border-color);
 }
 </style>

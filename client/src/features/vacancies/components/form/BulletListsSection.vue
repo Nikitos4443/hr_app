@@ -35,7 +35,7 @@ const lists = [
             severity="secondary"
             text
             size="small"
-            aria-label="Move up"
+            :aria-label="`Move ${list.label} row ${index + 1} up`"
             :disabled="index === 0"
             @click="props[list.key].move(index, -1)"
           />
@@ -44,7 +44,7 @@ const lists = [
             severity="secondary"
             text
             size="small"
-            aria-label="Move down"
+            :aria-label="`Move ${list.label} row ${index + 1} down`"
             :disabled="index === props[list.key].items.value.length - 1"
             @click="props[list.key].move(index, 1)"
           />
@@ -53,12 +53,13 @@ const lists = [
             severity="secondary"
             text
             size="small"
-            aria-label="Remove row"
+            :aria-label="`Remove ${list.label} row ${index + 1}`"
             @click="props[list.key].remove(item.id)"
           />
         </div>
         <Button
           label="Add row"
+          :aria-label="`Add ${list.label} row`"
           icon="pi pi-plus"
           severity="secondary"
           text

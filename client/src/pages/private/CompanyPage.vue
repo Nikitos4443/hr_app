@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import Message from 'primevue/message'
 import Skeleton from 'primevue/skeleton'
 
 import { CompanyForm, CompanyPreviewCard, useCompanyQuery } from '@/features/companies'
@@ -57,10 +58,9 @@ function retry() {
       <CompanyForm :company="company.data.value" />
       <aside class="company-page__side">
         <CompanyPreviewCard :company="company.data.value" />
-        <p class="company-page__note">
-          <i class="pi pi-info-circle" aria-hidden="true" />
+        <Message severity="info" icon="pi pi-info-circle" :closable="false">
           Only a company admin can edit the profile.
-        </p>
+        </Message>
       </aside>
     </div>
   </div>
@@ -92,13 +92,6 @@ function retry() {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.company-page__note {
-  display: flex;
-  gap: 8px;
-  margin: 0;
-  color: var(--p-text-muted-color);
 }
 
 @media (max-width: 900px) {

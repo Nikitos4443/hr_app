@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
 import type { FormSubmitEvent } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
@@ -155,11 +155,24 @@ export function useVacancyForm(vacancy?: Vacancy) {
     serverMessage.value = errorMessage(error)
   }
 
+  // Wait for FormItem to sync aria-invalid onto the controls, then jump to the first one.
+  async function focusFirstInvalid() {
+    await nextTick()
+    await nextTick()
+    const el = document.querySelector<HTMLElement>('.vacancy-form [aria-invalid="true"]')
+    if (!el) return
+    el.scrollIntoView({ block: 'center' })
+    el.focus({ preventScroll: true })
+  }
+
   function submit({ valid, values }: FormSubmitEvent) {
     serverErrors.value = {}
     serverMessage.value = null
     const questionsValid = questions.validate()
-    if (!valid || !questionsValid) return
+    if (!valid || !questionsValid) {
+      focusFirstInvalid()
+      return
+    }
     const payload = toPayload(
       values as VacancyFormValues,
       {
@@ -193,6 +206,14 @@ export function useVacancyForm(vacancy?: Vacancy) {
   function cancel() {
     router.push({ name: 'vacancies' })
   }
+
+  function warnBeforeUnload(event: BeforeUnloadEvent) {
+    if (saved.value || !isDirty.value) return
+    event.preventDefault()
+    event.returnValue = ''
+  }
+  onMounted(() => window.addEventListener('beforeunload', warnBeforeUnload))
+  onBeforeUnmount(() => window.removeEventListener('beforeunload', warnBeforeUnload))
 
   onBeforeRouteLeave(() => {
     if (saved.value || !isDirty.value) return true

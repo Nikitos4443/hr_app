@@ -8,6 +8,7 @@ import { ROLE_LABEL } from '../lib/roles'
 import { useSessionStore } from '../stores/session.store'
 
 const session = useSessionStore()
+const open = ref(false)
 const menu = ref<InstanceType<typeof Menu> | null>(null)
 
 const initials = computed(() => (session.user?.username ?? '?').slice(0, 2).toUpperCase())
@@ -26,7 +27,9 @@ function toggle(event: Event) {
       type="button"
       class="user-menu__trigger"
       aria-haspopup="true"
-      aria-controls="user-menu-popup"
+      :aria-controls="open ? 'user-menu-popup' : undefined"
+      :aria-expanded="open"
+      :aria-label="`Account menu, ${session.user.username}`"
       @click="toggle"
     >
       <Avatar :label="initials" shape="circle" />
@@ -34,7 +37,14 @@ function toggle(event: Event) {
       <Tag :value="roleLabel" severity="secondary" />
       <i class="pi pi-angle-down" aria-hidden="true" />
     </button>
-    <Menu id="user-menu-popup" ref="menu" :model="items" popup />
+    <Menu
+      id="user-menu-popup"
+      ref="menu"
+      :model="items"
+      popup
+      @show="open = true"
+      @hide="open = false"
+    />
   </div>
 </template>
 
@@ -54,6 +64,11 @@ function toggle(event: Event) {
 
 .user-menu__trigger:hover {
   background: var(--p-content-hover-background);
+}
+
+.user-menu__trigger:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 2px;
 }
 
 .user-menu__name {
