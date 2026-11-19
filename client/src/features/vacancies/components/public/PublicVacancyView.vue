@@ -3,7 +3,13 @@ import { computed } from 'vue'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 
-import { daysLeft, formatDate, formatSalary, isVacancyClosed } from '../../lib/vacancy-format'
+import {
+  daysLeft,
+  formatDate,
+  formatDaysLeft,
+  formatSalary,
+  isVacancyClosed,
+} from '../../lib/vacancy-format'
 import type { PublicVacancy } from '../../types/public-vacancy'
 import VacancyClosedBanner from './VacancyClosedBanner.vue'
 
@@ -49,6 +55,7 @@ const sections = computed(() =>
             rel="noopener noreferrer"
           >
             <i class="pi pi-globe" aria-hidden="true" /> {{ vacancy.company_website }}
+            <span class="vacancy__sr">(opens in a new tab)</span>
           </a>
         </div>
       </div>
@@ -79,7 +86,7 @@ const sections = computed(() =>
       <div v-if="deadline && !closed" class="vacancy__fact">
         <span class="vacancy__fact-label">Applications open until</span>
         <span class="vacancy__fact-value">{{ deadline }}</span>
-        <Tag v-if="remaining != null" severity="info" :value="`${remaining} days left`" />
+        <Tag v-if="remaining != null" severity="info" :value="formatDaysLeft(remaining)" />
       </div>
     </section>
 
@@ -159,9 +166,21 @@ const sections = computed(() =>
 }
 
 .vacancy__link {
+  position: relative;
+  display: inline-block;
+  padding: 4px 0;
   color: var(--p-text-muted-color);
   font-size: 13px;
   text-decoration: none;
+}
+
+.vacancy__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .vacancy__title {
@@ -261,8 +280,16 @@ const sections = computed(() =>
 
 @media (max-width: 600px) {
   .vacancy__cta {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
     flex-direction: column;
     align-items: stretch;
+    gap: 8px;
+    margin: 0 -24px;
+    padding: 12px 24px calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--p-content-border-color);
+    background: var(--p-content-background);
   }
 }
 </style>

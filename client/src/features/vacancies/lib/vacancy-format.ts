@@ -29,3 +29,8 @@ export function formatDate(iso: string): string {
 export function daysLeft(iso: string): number {
   return Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / DAY_MS))
 }
+
+export function formatDaysLeft(days: number): string {
+  if (days <= 0) return 'Closes today'
+  return days === 1 ? '1 day left' : `${days} days left`
+}

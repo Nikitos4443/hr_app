@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import Button from 'primevue/button'
 import Textarea from 'primevue/textarea'
 
-defineProps<{ disabled?: boolean; placeholder?: string }>()
+const props = defineProps<{ blocked?: boolean; placeholder?: string }>()
 
 const emit = defineEmits<{ send: [text: string] }>()
 
@@ -11,7 +11,7 @@ const text = ref('')
 
 function submit() {
   const trimmed = text.value.trim()
-  if (!trimmed) return
+  if (!trimmed || props.blocked) return
   emit('send', trimmed)
   text.value = ''
 }
@@ -30,16 +30,16 @@ function onKeydown(event: KeyboardEvent) {
       class="chat-input__field"
       rows="1"
       auto-resize
-      :disabled="disabled"
       :placeholder="placeholder ?? 'Write your question...'"
       aria-label="Message"
       @keydown="onKeydown"
     />
     <Button
       type="submit"
+      class="chat-input__send"
       icon="pi pi-send"
       aria-label="Send message"
-      :disabled="disabled || !text.trim()"
+      :disabled="blocked || !text.trim()"
     />
   </form>
 </template>
@@ -51,7 +51,14 @@ function onKeydown(event: KeyboardEvent) {
   gap: 8px;
 }
 
+.chat-input__send {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+}
+
 .chat-input__field {
+  min-height: 44px;
   flex: 1;
   max-height: 140px;
   resize: none;

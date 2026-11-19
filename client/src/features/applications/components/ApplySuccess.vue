@@ -1,11 +1,17 @@
 <script setup lang="ts">
+import { nextTick, onMounted, ref } from 'vue'
+
 defineProps<{ email: string }>()
+
+const title = ref<HTMLElement | null>(null)
+
+onMounted(() => nextTick(() => title.value?.focus()))
 </script>
 
 <template>
-  <div class="success" role="status">
+  <div class="success">
     <span class="success__icon"><i class="pi pi-check" aria-hidden="true" /></span>
-    <h2 class="success__title">Thank you for applying!</h2>
+    <h1 ref="title" class="success__title" tabindex="-1">Thank you for applying!</h1>
     <p class="success__text">
       We will review your resume and email you at <strong>{{ email }}</strong
       >.
@@ -42,6 +48,10 @@ defineProps<{ email: string }>()
 
 .success__title {
   margin: 0;
+}
+
+.success__title:focus {
+  outline: none;
 }
 
 .success__text {

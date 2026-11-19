@@ -53,7 +53,14 @@ watch(() => [chat.messages.value.length, chat.botTyping.value, chat.error.value]
       <span v-if="statusLabel" class="chat__status" role="status">{{ statusLabel }}</span>
     </header>
 
-    <div ref="list" class="chat__list" aria-live="polite" aria-relevant="additions">
+    <div
+      ref="list"
+      class="chat__list"
+      role="log"
+      aria-label="Conversation"
+      aria-live="polite"
+      aria-relevant="additions"
+    >
       <ChatGreeting
         :title="chat.vacancyTitle.value"
         :company="company"
@@ -70,11 +77,7 @@ watch(() => [chat.messages.value.length, chat.botTyping.value, chat.error.value]
 
     <div class="chat__footer">
       <ChatErrorBanner v-if="chat.error.value" :message="chat.error.value" @retry="chat.retry" />
-      <ChatInput
-        :disabled="!chat.canSend.value"
-        :placeholder="inputPlaceholder"
-        @send="chat.send"
-      />
+      <ChatInput :blocked="!chat.canSend.value" :placeholder="inputPlaceholder" @send="chat.send" />
       <p class="chat__note">
         <i class="pi pi-info-circle" aria-hidden="true" />
         Answers are based only on the vacancy and company information.
@@ -87,8 +90,8 @@ watch(() => [chat.messages.value.length, chat.botTyping.value, chat.error.value]
 .chat {
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - 140px);
-  min-height: 420px;
+  flex: 1;
+  min-height: 0;
   border: 1px solid var(--p-content-border-color);
   border-radius: var(--p-content-border-radius);
   background: var(--p-content-background);
@@ -125,6 +128,7 @@ watch(() => [chat.messages.value.length, chat.botTyping.value, chat.error.value]
 
 .chat__list {
   display: flex;
+  min-height: 0;
   flex: 1;
   flex-direction: column;
   gap: 12px;
@@ -134,6 +138,7 @@ watch(() => [chat.messages.value.length, chat.botTyping.value, chat.error.value]
 
 .chat__footer {
   display: flex;
+  flex: none;
   flex-direction: column;
   gap: 10px;
   padding: 12px 16px 16px;

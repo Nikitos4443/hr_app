@@ -43,14 +43,15 @@ export interface UploadVideoInput {
   questionId: number
   video: Blob
   onProgress?: (percent: number) => void
+  signal?: AbortSignal
 }
 
 export function useUploadVideoAnswerMutation(token: MaybeRefOrGetter<string>) {
   return useMutation({
-    mutationFn: async ({ questionId, video, onProgress }: UploadVideoInput) => {
+    mutationFn: async ({ questionId, video, onProgress, signal }: UploadVideoInput) => {
       const post = await screeningApi.getVideoUploadUrl(toValue(token), questionId)
       const fields = { ...post.fields, 'Content-Type': video.type || 'video/webm' }
-      await uploadToPresignedPost({ ...post, fields }, video, { onProgress })
+      await uploadToPresignedPost({ ...post, fields }, video, { onProgress, signal })
     },
   })
 }

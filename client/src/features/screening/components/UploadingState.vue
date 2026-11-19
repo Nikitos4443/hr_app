@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
 import ProgressBar from 'primevue/progressbar'
 
 import { formatMegabytes } from '../lib/format'
 
-defineProps<{
+const props = defineProps<{
   percent: number
   fileName: string
   sizeBytes: number
@@ -13,7 +14,14 @@ defineProps<{
   errorText: string
 }>()
 
-const emit = defineEmits<{ retry: []; back: [] }>()
+const emit = defineEmits<{ retry: []; back: []; cancel: [] }>()
+
+// Announce progress in coarse steps so screen readers are not flooded.
+const announcement = computed(() =>
+  props.failed
+    ? ''
+    : `Uploading your answer, ${Math.min(100, Math.floor(props.percent / 25) * 25)}%`,
+)
 </script>
 
 <template>
@@ -24,11 +32,12 @@ const emit = defineEmits<{ retry: []; back: [] }>()
       <i class="pi pi-video uploading__icon" aria-hidden="true" />
       <div class="uploading__meta">
         <span class="uploading__name">{{ fileName }}</span>
-        <span class="uploading__size" role="status">
+        <span class="uploading__size" aria-hidden="true">
           {{ failed ? formatMegabytes(sizeBytes) : `${percent}% of ${formatMegabytes(sizeBytes)}` }}
         </span>
       </div>
     </div>
+    <p class="visually-hidden" role="status">{{ announcement }}</p>
     <ProgressBar :value="percent" :show-value="false" aria-label="Video upload progress" />
 
     <Message v-if="failed" severity="error" icon="pi pi-exclamation-circle" role="alert">
@@ -37,6 +46,16 @@ const emit = defineEmits<{ retry: []; back: [] }>()
     <p v-else class="uploading__hint">
       Please keep this page open. If the connection drops, we will let you retry.
     </p>
+
+    <Button
+      v-if="!failed"
+      label="Cancel upload"
+      icon="pi pi-times"
+      severity="secondary"
+      variant="outlined"
+      fluid
+      @click="emit('cancel')"
+    />
 
     <div v-if="failed" class="uploading__actions">
       <Button label="Retry upload" icon="pi pi-refresh" size="large" fluid @click="emit('retry')" />
@@ -93,6 +112,15 @@ const emit = defineEmits<{ retry: []; back: [] }>()
   margin: 0;
   color: var(--p-text-muted-color);
   font-variant-numeric: tabular-nums;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .uploading__actions {

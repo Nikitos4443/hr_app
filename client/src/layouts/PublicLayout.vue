@@ -1,24 +1,31 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import Button from 'primevue/button'
-import { RouterView } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
 
 import { useSessionStore } from '@/features/auth'
 import { AppLogo, SkipLink, ThemeToggle } from '@/shared/ui'
 
 const session = useSessionStore()
+const route = useRoute()
+
+// Candidate-facing pages (vacancy, apply, 404) must not show HR-facing chrome.
+const showHrChrome = computed(() => route.name === 'home' || route.name === 'forbidden')
 </script>
 
 <template>
   <div class="public-layout">
     <SkipLink />
     <header class="public-layout__header">
-      <AppLogo />
+      <AppLogo v-if="showHrChrome" />
       <div class="public-layout__actions">
         <ThemeToggle />
-        <RouterLink v-if="session.isAuthenticated" :to="{ name: 'vacancies' }">
+        <RouterLink v-if="showHrChrome && session.isAuthenticated" :to="{ name: 'vacancies' }">
           <Button label="Open app" />
         </RouterLink>
-        <RouterLink v-else :to="{ name: 'auth' }"><Button label="Sign in" /></RouterLink>
+        <RouterLink v-else-if="showHrChrome" :to="{ name: 'auth' }"
+          ><Button label="Sign in"
+        /></RouterLink>
       </div>
     </header>
     <main id="main" tabindex="-1" class="public-layout__main"><RouterView /></main>
@@ -43,6 +50,7 @@ const session = useSessionStore()
 }
 
 .public-layout__actions {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 12px;

@@ -1,52 +1,74 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import Button from 'primevue/button'
+import Skeleton from 'primevue/skeleton'
 import { useRoute } from 'vue-router'
 
 import { ApplyForm } from '@/features/applications'
 import { isVacancyClosed, usePublicVacancyQuery, VacancyClosedBanner } from '@/features/vacancies'
-import { EmptyState } from '@/shared/ui'
+import { isApiError } from '@/shared/api'
+import { EmptyState, ErrorState } from '@/shared/ui'
 
 const route = useRoute()
 const vacancyId = computed(() => Number(route.params.vacancyId))
 const query = usePublicVacancyQuery(vacancyId)
 const vacancy = computed(() => query.data.value)
 const closed = computed(() => (vacancy.value ? isVacancyClosed(vacancy.value) : false))
+const notFound = computed(() => isApiError(query.error.value) && query.error.value.status === 404)
+const submitted = ref(false)
 </script>
 
 <template>
   <section class="apply">
-    <header v-if="vacancy" class="apply__head">
-      <span class="apply__avatar" aria-hidden="true">{{ vacancy.company.slice(0, 2) }}</span>
-      <div>
-        <div class="apply__company">{{ vacancy.company }}</div>
-        <div class="apply__title">{{ vacancy.title }}</div>
-      </div>
-    </header>
-
-    <h1 class="apply__heading">Apply</h1>
-    <p class="apply__lead">Just your email and resume, no registration needed.</p>
-
-    <VacancyClosedBanner v-if="vacancy && closed" :company="vacancy.company" />
+    <div v-if="query.isPending.value" class="apply__skeleton" role="status" aria-busy="true">
+      <span class="visually-hidden">Loading the application form...</span>
+      <Skeleton height="40px" width="60%" />
+      <Skeleton height="28px" width="30%" />
+      <Skeleton height="44px" />
+      <Skeleton height="120px" />
+      <Skeleton height="48px" />
+    </div>
 
     <EmptyState
-      v-else-if="query.isError.value"
+      v-else-if="notFound"
       icon="pi pi-search"
       title="Vacancy not found"
       description="The link may be outdated or the vacancy was removed."
-    >
-      <RouterLink :to="{ name: 'home' }"><Button label="Back to home" /></RouterLink>
-    </EmptyState>
+    />
 
-    <ApplyForm v-else :vacancy-id="vacancyId" />
-
-    <RouterLink
-      v-if="vacancy"
-      class="apply__back"
-      :to="{ name: 'public-vacancy', params: { vacancyId } }"
+    <ErrorState
+      v-else-if="query.isError.value"
+      title="Couldn't load the application form"
+      description="Check your connection and try again."
     >
-      <i class="pi pi-arrow-left" aria-hidden="true" /> Back to the vacancy
-    </RouterLink>
+      <Button label="Try again" icon="pi pi-refresh" @click="query.refetch()" />
+    </ErrorState>
+
+    <template v-else-if="vacancy">
+      <header class="apply__head">
+        <span class="apply__avatar" aria-hidden="true">{{ vacancy.company.slice(0, 2) }}</span>
+        <div>
+          <div class="apply__company">{{ vacancy.company }}</div>
+          <div class="apply__title">{{ vacancy.title }}</div>
+        </div>
+      </header>
+
+      <template v-if="!submitted">
+        <h1 class="apply__heading">Apply</h1>
+        <p class="apply__lead">Just your email and resume, no registration needed.</p>
+      </template>
+
+      <VacancyClosedBanner v-if="closed" :company="vacancy.company" />
+      <ApplyForm v-else :vacancy-id="vacancyId" @success="submitted = true" />
+
+      <RouterLink
+        v-if="!submitted"
+        class="apply__back"
+        :to="{ name: 'public-vacancy', params: { vacancyId } }"
+      >
+        <i class="pi pi-arrow-left" aria-hidden="true" /> Back to the vacancy
+      </RouterLink>
+    </template>
   </section>
 </template>
 
@@ -67,6 +89,21 @@ const closed = computed(() => (vacancy.value ? isVacancyClosed(vacancy.value) : 
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.apply__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .apply__avatar {
@@ -103,6 +140,10 @@ const closed = computed(() => (vacancy.value ? isVacancyClosed(vacancy.value) : 
 }
 
 .apply__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
   align-self: flex-start;
   color: var(--p-text-muted-color);
   font-size: 13px;

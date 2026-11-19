@@ -62,10 +62,6 @@ export function useApplyForm(vacancyId: () => number) {
     send()
   }
 
-  function retry() {
-    send()
-  }
-
   return {
     resolver,
     resume,
@@ -77,6 +73,5 @@ export function useApplyForm(vacancyId: () => number) {
     selectResume,
     removeResume,
     submit,
-    retry,
   }
 }

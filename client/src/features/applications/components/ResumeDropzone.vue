@@ -1,18 +1,43 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { nextTick, ref, useId, watch } from 'vue'
 import Button from 'primevue/button'
 
 import { formatFileSize, MAX_RESUME_SIZE_BYTES, RESUME_CONTENT_TYPE } from '../lib/resume'
 
-defineProps<{ file: File | null; invalid?: boolean; disabled?: boolean }>()
+const props = defineProps<{
+  file: File | null
+  invalid?: boolean
+  disabled?: boolean
+  /** Space separated ids of the visible hint/error, from FormItem. */
+  describedBy?: string
+}>()
 
 const emit = defineEmits<{ select: [file: File]; remove: [] }>()
 
+const uid = useId()
+const titleId = `${uid}-title`
+const hintId = `${uid}-hint`
+const prefixId = `${uid}-prefix`
+
 const input = ref<HTMLInputElement | null>(null)
+const dropzone = ref<HTMLElement | null>(null)
+const removeButton = ref<{ $el: HTMLElement } | null>(null)
 const dragging = ref(false)
 
+// Keep keyboard focus on a live control when the dropzone and the file card swap.
+watch(
+  () => props.file,
+  (file, previous) => {
+    if (!!file === !!previous) return
+    nextTick(() => {
+      if (file) removeButton.value?.$el.focus()
+      else dropzone.value?.focus()
+    })
+  },
+)
+
 function pick() {
-  input.value?.click()
+  if (!props.disabled) input.value?.click()
 }
 
 function onChange(event: Event) {
@@ -25,23 +50,31 @@ function onChange(event: Event) {
 function onDrop(event: DragEvent) {
   dragging.value = false
   const file = event.dataTransfer?.files?.[0]
-  if (file) emit('select', file)
+  if (file && !props.disabled) emit('select', file)
 }
 </script>
 
 <template>
-  <div v-if="file" class="resume-file" :class="{ 'resume-file--invalid': invalid }">
+  <div
+    v-if="file"
+    class="resume-file"
+    :class="{ 'resume-file--invalid': invalid }"
+    role="group"
+    aria-label="Selected resume"
+    :aria-describedby="describedBy"
+  >
     <i class="pi pi-file-pdf resume-file__icon" aria-hidden="true" />
     <div class="resume-file__info">
       <span class="resume-file__name">{{ file.name }}</span>
       <span class="resume-file__size">{{ formatFileSize(file.size) }}</span>
     </div>
     <Button
+      ref="removeButton"
       icon="pi pi-times"
       severity="secondary"
       variant="text"
       rounded
-      aria-label="Remove file"
+      :aria-label="`Remove ${file.name}`"
       :disabled="disabled"
       @click="emit('remove')"
     />
@@ -49,11 +82,15 @@ function onDrop(event: DragEvent) {
 
   <div
     v-else
+    ref="dropzone"
     class="dropzone"
     :class="{ 'dropzone--active': dragging, 'dropzone--invalid': invalid }"
     role="button"
     tabindex="0"
-    aria-label="Choose a PDF resume"
+    :aria-labelledby="`${prefixId} ${titleId}`"
+    :aria-describedby="[describedBy, hintId].filter(Boolean).join(' ')"
+    :aria-invalid="invalid ? 'true' : undefined"
+    :aria-disabled="disabled ? 'true' : undefined"
     @click="pick"
     @keydown.enter.prevent="pick"
     @keydown.space.prevent="pick"
@@ -61,10 +98,17 @@ function onDrop(event: DragEvent) {
     @dragleave.prevent="dragging = false"
     @drop.prevent="onDrop"
   >
+    <span :id="prefixId" class="visually-hidden">Resume (PDF):</span>
     <i class="pi pi-upload dropzone__icon" aria-hidden="true" />
-    <span class="dropzone__title">Drag a PDF here or click to choose a file</span>
-    <span class="dropzone__hint">Up to {{ formatFileSize(MAX_RESUME_SIZE_BYTES) }}</span>
+    <span :id="titleId" class="dropzone__title">Drag a PDF here or click to choose a file</span>
+    <span :id="hintId" class="dropzone__hint"
+      >Up to {{ formatFileSize(MAX_RESUME_SIZE_BYTES) }}</span
+    >
   </div>
+
+  <span class="visually-hidden" role="status">{{
+    file ? `Selected ${file.name}, ${formatFileSize(file.size)}` : ''
+  }}</span>
 
   <input
     ref="input"
@@ -95,10 +139,18 @@ function onDrop(event: DragEvent) {
 }
 
 .dropzone:hover,
-.dropzone:focus-visible,
 .dropzone--active {
   border-color: var(--p-primary-color);
   background: var(--p-highlight-background);
+}
+
+.dropzone:focus-visible {
+  border-color: var(--p-primary-color);
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 2px;
+}
+
+.resume-file:focus {
   outline: none;
 }
 

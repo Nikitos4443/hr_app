@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import Button from 'primevue/button'
-
 import EndStateCard from './EndStateCard.vue'
 </script>
 
@@ -14,17 +12,6 @@ import EndStateCard from './EndStateCard.vue'
     <p class="rejection__hint">
       Another position may suit you, check the current vacancies on the company website.
     </p>
-    <RouterLink to="/" custom v-slot="{ navigate }">
-      <Button
-        label="Browse vacancies"
-        icon="pi pi-arrow-right"
-        icon-pos="right"
-        severity="secondary"
-        size="large"
-        fluid
-        @click="navigate"
-      />
-    </RouterLink>
   </EndStateCard>
 </template>
 
