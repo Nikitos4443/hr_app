@@ -84,7 +84,7 @@ const items = computed<MenuItem[]>(() => [
       severity="secondary"
       text
       rounded
-      aria-label="Edit vacancy"
+      :aria-label="`Edit vacancy ${vacancy.title}`"
       @click="edit"
     />
     <Button
@@ -92,7 +92,7 @@ const items = computed<MenuItem[]>(() => [
       severity="secondary"
       text
       rounded
-      aria-label="More actions"
+      :aria-label="`More actions for ${vacancy.title}`"
       aria-haspopup="true"
       :loading="busy"
       @click="menu?.toggle($event)"
@@ -109,6 +109,6 @@ const items = computed<MenuItem[]>(() => [
 }
 
 :global(.row-actions__danger) {
-  color: var(--p-red-500);
+  color: var(--p-tag-danger-color);
 }
 </style>

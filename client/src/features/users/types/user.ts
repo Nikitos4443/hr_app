@@ -5,6 +5,7 @@ export interface User {
   username: string
   role: UserRole
   company_id: number | null
+  created_at?: string | null
 }
 
 export interface CreateUserPayload {

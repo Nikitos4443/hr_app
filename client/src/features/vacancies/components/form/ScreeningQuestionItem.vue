@@ -48,7 +48,7 @@ const typeOptions = [
         severity="secondary"
         text
         size="small"
-        aria-label="Move up"
+        :aria-label="`Move question ${index + 1} up`"
         :disabled="index === 0"
         @click="emit('move-up')"
       />
@@ -57,7 +57,7 @@ const typeOptions = [
         severity="secondary"
         text
         size="small"
-        aria-label="Move down"
+        :aria-label="`Move question ${index + 1} down`"
         :disabled="index === count - 1"
         @click="emit('move-down')"
       />
@@ -66,7 +66,7 @@ const typeOptions = [
         severity="danger"
         text
         size="small"
-        aria-label="Remove question"
+        :aria-label="`Remove question ${index + 1}`"
         @click="emit('remove')"
       />
     </div>
@@ -97,7 +97,7 @@ const typeOptions = [
           option-label="label"
           option-value="value"
           :allow-empty="false"
-          aria-label="Question format"
+          :aria-label="`Question ${index + 1} format`"
           @update:model-value="emit('change-type', $event)"
         />
       </FormItem>

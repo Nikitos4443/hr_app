@@ -53,7 +53,10 @@ export function useCompanyForm(company: Ref<Company | null>) {
 
     if (company.value) {
       updateMutation.mutate(
-        { id: company.value.id, payload: { name, description, website } },
+        {
+          id: company.value.id,
+          payload: { name, description: description || null, website: website || null },
+        },
         {
           onSuccess: () => notify.success('Company profile saved'),
           onError: handleError,

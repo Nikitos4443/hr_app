@@ -18,7 +18,9 @@ const filters = useVacancyFilters(data)
 const subtitle = computed(() => {
   const total = data.value?.length
   if (total === undefined) return undefined
-  return `${total} ${total === 1 ? 'vacancy' : 'vacancies'}`
+  const base = `${total} ${total === 1 ? 'vacancy' : 'vacancies'}`
+  const failed = data.value?.filter((v) => v.selection_status === 'failed').length ?? 0
+  return failed ? `${base} · ${failed} need attention` : base
 })
 </script>
 

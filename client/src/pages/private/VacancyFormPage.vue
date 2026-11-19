@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
+import Tag from 'primevue/tag'
 
 import { ErrorState, PageHeader } from '@/shared/ui'
 import { isNotFound } from '@/shared/api'
@@ -13,6 +14,7 @@ const route = useRoute()
 const vacancyId = computed(() => (route.params.id ? Number(route.params.id) : null))
 const isEdit = computed(() => vacancyId.value !== null)
 const vacancy = useVacancyQuery(vacancyId)
+const dirty = ref(false)
 </script>
 
 <template>
@@ -20,7 +22,9 @@ const vacancy = useVacancyQuery(vacancyId)
     <PageHeader
       :title="isEdit ? 'Edit vacancy' : 'New vacancy'"
       :subtitle="isEdit ? vacancy.data.value?.title : undefined"
-    />
+    >
+      <Tag v-if="dirty" severity="warn" icon="pi pi-pencil" value="Unsaved changes" />
+    </PageHeader>
 
     <div v-if="isEdit && vacancy.isPending.value" class="form-page__skeleton">
       <Skeleton v-for="n in 3" :key="n" height="160px" />
@@ -49,7 +53,12 @@ const vacancy = useVacancyQuery(vacancyId)
       />
     </ErrorState>
 
-    <VacancyForm v-else :key="vacancyId ?? 'new'" :vacancy="vacancy.data.value" />
+    <VacancyForm
+      v-else
+      :key="vacancyId ?? 'new'"
+      :vacancy="vacancy.data.value"
+      @dirty-change="dirty = $event"
+    />
   </div>
 </template>
 

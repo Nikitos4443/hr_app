@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { Form, type FormSubmitEvent } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import Button from 'primevue/button'
@@ -24,8 +24,16 @@ const formRef = ref<InstanceType<typeof Form> | null>(null)
 const serverErrors = ref<Record<string, string>>({})
 const formError = ref<string | null>(null)
 
+let returnFocusTo: HTMLElement | null = null
+
 watch(visible, (open) => {
-  if (open) return
+  if (open) {
+    returnFocusTo = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    return
+  }
+  const target = returnFocusTo
+  returnFocusTo = null
+  if (target?.isConnected) void nextTick(() => target.focus())
   formRef.value?.reset()
   serverErrors.value = {}
   formError.value = null
@@ -57,7 +65,12 @@ function onSubmit({ valid, values }: FormSubmitEvent) {
 </script>
 
 <template>
-  <Dialog v-model:visible="visible" modal header="Create HR user" :style="{ width: '420px' }">
+  <Dialog
+    v-model:visible="visible"
+    modal
+    header="Create HR user"
+    :style="{ width: 'min(420px, calc(100vw - 2rem))' }"
+  >
     <Form
       ref="formRef"
       v-slot="$form"

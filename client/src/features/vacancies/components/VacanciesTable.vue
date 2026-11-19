@@ -27,6 +27,9 @@ function onPage(event: DataTablePageEvent) {
   emit('page', event.page + 1)
 }
 
+const ariaSort = () =>
+  props.sort === 'asc' ? 'ascending' : props.sort === 'desc' ? 'descending' : 'none'
+
 const sortIcon = () =>
   props.sort === 'asc'
     ? 'pi-sort-amount-up-alt'
@@ -36,7 +39,7 @@ const sortIcon = () =>
 </script>
 
 <template>
-  <div class="table-card">
+  <div class="table-card focus-ring" tabindex="0" role="region" aria-label="Vacancies table">
     <DataTable
       :value="rows"
       data-key="id"
@@ -74,7 +77,7 @@ const sortIcon = () =>
           {{ formatSalaryRange(data.salary_min, data.salary_max, data.salary_currency) }}
         </template>
       </Column>
-      <Column>
+      <Column :pt="{ headerCell: { 'aria-sort': ariaSort } }">
         <template #header>
           <button
             type="button"
@@ -92,7 +95,9 @@ const sortIcon = () =>
         <template #body="{ data }"><StatusTag kind="vacancy" :status="data.status" /></template>
       </Column>
       <Column header="AI selection">
-        <template #body="{ data }"><AiStatus :status="data.selection_status" /></template>
+        <template #body="{ data }"
+          ><AiStatus :status="data.selection_status" role="presentation"
+        /></template>
       </Column>
       <Column header-style="width: 7rem">
         <template #body="{ data }"><VacancyRowActions :vacancy="data" /></template>
@@ -107,6 +112,11 @@ const sortIcon = () =>
   border: 1px solid var(--p-content-border-color);
   border-radius: var(--p-content-border-radius);
   background: var(--p-content-background);
+}
+
+.sort-button:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 2px;
 }
 
 .cell-title {
