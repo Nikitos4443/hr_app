@@ -1,0 +1,11 @@
+<script setup lang="ts">
+import ConfirmDialog from 'primevue/confirmdialog'
+import Toast from 'primevue/toast'
+import { RouterView } from 'vue-router'
+</script>
+
+<template>
+  <RouterView />
+  <Toast position="top-right" :breakpoints="{ '480px': { width: 'calc(100vw - 2rem)' } }" />
+  <ConfirmDialog />
+</template>

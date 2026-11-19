@@ -1,7 +1,35 @@
+@import '@fontsource-variable/onest';
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+:root {
+  --font-sans: 'Onest Variable', system-ui, sans-serif;
+  --p-font-family: var(--font-sans);
+
+  /* Score scale (light theme). Thresholds: >= 80 · 50-79 · < 50 */
+  --hr-score-hi: var(--p-green-700);
+  --hr-score-mid: var(--p-primary-color);
+  --hr-score-lo: var(--p-orange-700);
+}
+
+.app-dark {
+  --hr-score-hi: var(--p-green-400);
+  --hr-score-lo: var(--p-orange-400);
+}
+
+/* Reusable keyboard focus ring */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 2px;
+}
+
+/* The main landmark is focused programmatically after navigation; no ring needed. */
+main:focus {
+  outline: none;
 }
 
 html,
@@ -12,7 +40,18 @@ body,
 }
 
 body {
-  font-family: var(--p-font-family, system-ui, sans-serif);
+  font-family: var(--font-sans);
+  font-size: 14px;
   background: var(--p-surface-50);
   color: var(--p-text-color);
+}
+
+.app-dark body {
+  background: var(--p-surface-950);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+  }
 }
