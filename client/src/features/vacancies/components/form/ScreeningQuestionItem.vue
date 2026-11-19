@@ -8,7 +8,7 @@ import Textarea from 'primevue/textarea'
 import { FormItem } from '@/shared/ui'
 
 import type { QuestionDraft, QuestionErrors, QuestionType } from '../../composables/useQuestionList'
-import { MAX_TEXT_ANSWER_LENGTH } from '../../lib/schemas'
+import { MAX_TEXT_ANSWER_LENGTH, MAX_VIDEO_DURATION_SEC } from '../../lib/schemas'
 
 defineProps<{
   question: QuestionDraft
@@ -111,6 +111,7 @@ const typeOptions = [
           :input-id="`question-duration-${question.id}`"
           :model-value="question.max_duration_sec"
           :min="0"
+          :max="MAX_VIDEO_DURATION_SEC"
           :invalid="Boolean(errors.max_duration_sec)"
           suffix=" sec"
           @update:model-value="emit('update-duration', $event)"

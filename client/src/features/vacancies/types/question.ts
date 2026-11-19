@@ -8,3 +8,9 @@ export interface VacancyQuestion {
   text: string
   video_max_duration_sec: number | null
 }
+
+export interface QuestionInput {
+  type: QuestionType
+  text: string
+  video_max_duration_sec: number | null
+}

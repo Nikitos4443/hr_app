@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { onBeforeRouteLeave, useRouter } from 'vue-router'
 import type { FormSubmitEvent } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
@@ -7,10 +7,11 @@ import { useConfirm } from 'primevue/useconfirm'
 import { errorMessage, isApiError } from '@/shared/api'
 import { useNotify } from '@/shared/composables/useNotify'
 
+import { useReplaceQuestionsMutation, useVacancyQuestionsQuery } from '../api/questions.queries'
 import { useCreateVacancyMutation, useUpdateVacancyMutation } from '../api/vacancies.queries'
 import { createVacancySchema, type VacancyFormValues } from '../lib/schemas'
 import type { CreateVacancyPayload, Vacancy } from '../types/vacancy'
-import { useQuestionList } from './useQuestionList'
+import { toQuestionInputs, useQuestionList } from './useQuestionList'
 import { useStringList } from './useStringList'
 
 interface FormStateProbe {
@@ -68,6 +69,7 @@ export function useVacancyForm(vacancy?: Vacancy) {
   const notify = useNotify()
   const create = useCreateVacancyMutation()
   const update = useUpdateVacancyMutation()
+  const replaceQuestions = useReplaceQuestionsMutation()
 
   const isEdit = vacancy !== undefined
   const unchangedDeadline = vacancy?.deadline_at ? new Date(vacancy.deadline_at).getTime() : null
@@ -80,6 +82,19 @@ export function useVacancyForm(vacancy?: Vacancy) {
   const requirements = useStringList(vacancy?.requirements)
   const niceToHave = useStringList(vacancy?.nice_to_have)
   const questions = useQuestionList()
+  const questionsQuery = useVacancyQuestionsQuery(() => vacancy?.id)
+
+  // Prefill once the existing questions arrive, unless the user already started editing.
+  watch(
+    () => questionsQuery.data.value,
+    (data) => {
+      if (data && !questions.touched.value) questions.reset(data)
+    },
+    { immediate: true },
+  )
+
+  // Set once the vacancy itself is stored, so a retry never creates a duplicate.
+  const savedVacancyId = ref<number | null>(vacancy?.id ?? null)
 
   const serverErrors = ref<Record<string, string>>({})
   const serverMessage = ref<string | null>(null)
@@ -94,12 +109,40 @@ export function useVacancyForm(vacancy?: Vacancy) {
       questions.dirty.value,
   )
 
-  const isSaving = computed(() => create.isPending.value || update.isPending.value)
+  const isSaving = computed(
+    () => create.isPending.value || update.isPending.value || replaceQuestions.isPending.value,
+  )
 
-  function onSuccess() {
+  function finish() {
     saved.value = true
     notify.success(isEdit ? 'Vacancy updated' : 'Vacancy created')
     router.push({ name: 'vacancies' })
+  }
+
+  function saveQuestions(vacancyId: number) {
+    // Do not overwrite existing questions with an empty list if they never loaded.
+    const loaded = !isEdit || questionsQuery.isSuccess.value
+    if (!loaded || (isEdit && !questions.dirty.value)) {
+      finish()
+      return
+    }
+    if (!isEdit && !questions.items.value.length) {
+      finish()
+      return
+    }
+    replaceQuestions.mutate(
+      { vacancyId, items: toQuestionInputs(questions.items.value) },
+      {
+        onSuccess: () => {
+          questions.reset(replaceQuestions.data.value ?? [])
+          finish()
+        },
+        onError: (error) => {
+          notify.error(error, 'Vacancy saved, but the screening questions were not. Try again.')
+          if (isApiError(error)) serverMessage.value = error.detail
+        },
+      },
+    )
   }
 
   function onError(error: unknown) {
@@ -127,9 +170,24 @@ export function useVacancyForm(vacancy?: Vacancy) {
       unchangedDeadline,
       isEdit,
     )
-    const options = { onSuccess, onError }
-    if (vacancy) update.mutate({ id: vacancy.id, payload }, options)
-    else create.mutate(payload, options)
+    if (isEdit && !questionsQuery.isSuccess.value && questions.touched.value) {
+      serverMessage.value = 'Existing questions are still loading. Please try again in a moment.'
+      return
+    }
+    if (savedVacancyId.value !== null) {
+      update.mutate(
+        { id: savedVacancyId.value, payload },
+        { onSuccess: (saved) => saveQuestions(saved.id), onError },
+      )
+      return
+    }
+    create.mutate(payload, {
+      onSuccess: (created) => {
+        savedVacancyId.value = created.id
+        saveQuestions(created.id)
+      },
+      onError,
+    })
   }
 
   function cancel() {
