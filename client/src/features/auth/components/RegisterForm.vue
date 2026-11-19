@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick } from 'vue'
 import { Form, type FormSubmitEvent } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import Button from 'primevue/button'
@@ -22,8 +22,21 @@ const { redirectAfterAuth } = useAuthRedirect()
 
 const errorText = computed(() => (register.error.value ? errorMessage(register.error.value) : null))
 
+// Wait for FormItem to sync aria-invalid onto the controls, then jump to the first one.
+async function focusFirstInvalid() {
+  await nextTick()
+  await nextTick()
+  const el = document.querySelector<HTMLElement>('.auth-form [aria-invalid="true"]')
+  if (!el) return
+  el.scrollIntoView({ block: 'center' })
+  el.focus({ preventScroll: true })
+}
+
 function onSubmit({ valid, values }: FormSubmitEvent) {
-  if (!valid) return
+  if (!valid) {
+    focusFirstInvalid()
+    return
+  }
   register.mutate(
     {
       username: values.username.trim().toLowerCase(),

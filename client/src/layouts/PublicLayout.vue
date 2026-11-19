@@ -4,13 +4,24 @@ import Button from 'primevue/button'
 import { RouterView, useRoute } from 'vue-router'
 
 import { useSessionStore } from '@/features/auth'
-import { AppLogo, SkipLink, ThemeToggle } from '@/shared/ui'
+import { usePublicVacancyQuery } from '@/features/vacancies'
+import { AppLogo, CompanyAvatar, SkipLink, ThemeToggle } from '@/shared/ui'
 
 const session = useSessionStore()
 const route = useRoute()
 
 // Candidate-facing pages (vacancy, apply, 404) must not show HR-facing chrome.
 const showHrChrome = computed(() => route.name === 'home' || route.name === 'forbidden')
+
+// Vacancy and apply pages show the company brand instead.
+const showBrand = computed(() => route.name === 'public-vacancy' || route.name === 'apply')
+
+const vacancyId = computed(() => {
+  const id = Number(route.params.vacancyId)
+  return Number.isFinite(id) && id > 0 ? id : null
+})
+const brandQuery = usePublicVacancyQuery(vacancyId)
+const brand = computed(() => (showBrand.value ? (brandQuery.data.value?.company ?? null) : null))
 </script>
 
 <template>
@@ -18,6 +29,10 @@ const showHrChrome = computed(() => route.name === 'home' || route.name === 'for
     <SkipLink />
     <header class="public-layout__header">
       <AppLogo v-if="showHrChrome" />
+      <div v-if="brand" class="brand">
+        <CompanyAvatar :name="brand" :size="32" />
+        <span class="brand__name">{{ brand }}</span>
+      </div>
       <div class="public-layout__actions">
         <ThemeToggle />
         <RouterLink v-if="showHrChrome && session.isAuthenticated" :to="{ name: 'vacancies' }">
@@ -62,5 +77,19 @@ const showHrChrome = computed(() => route.name === 'home' || route.name === 'for
   max-width: 1440px;
   margin: 0 auto;
   padding: 0 24px 48px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.brand__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

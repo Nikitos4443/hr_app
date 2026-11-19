@@ -73,14 +73,15 @@ watch(() => [chat.messages.value.length, chat.botTyping.value, chat.error.value]
         :message="message"
       />
       <TypingIndicator v-if="chat.botTyping.value" />
+      <ChatErrorBanner v-if="chat.error.value" :message="chat.error.value" @retry="chat.retry" />
     </div>
 
     <div class="chat__footer">
-      <ChatErrorBanner v-if="chat.error.value" :message="chat.error.value" @retry="chat.retry" />
       <ChatInput :blocked="!chat.canSend.value" :placeholder="inputPlaceholder" @send="chat.send" />
       <p class="chat__note">
         <i class="pi pi-info-circle" aria-hidden="true" />
-        Answers are based only on the vacancy and company information.
+        Answers are based only on the vacancy and company information. Enter to send, Shift+Enter
+        for a new line.
       </p>
     </div>
   </section>

@@ -9,6 +9,7 @@ const props = defineProps<{
   limitLabel: string
   icon?: string
   caption?: string
+  reviewCaption?: string
 }>()
 
 const liveEl = ref<HTMLVideoElement | null>(null)
@@ -41,6 +42,10 @@ watchEffect(() => {
       <i :class="icon ?? 'pi pi-video'" aria-hidden="true" />
       <span v-if="caption">{{ caption }}</span>
     </div>
+
+    <span v-if="src && reviewCaption" class="preview__pill preview__pill--start">{{
+      reviewCaption
+    }}</span>
 
     <template v-if="recording">
       <span class="preview__pill preview__pill--start">

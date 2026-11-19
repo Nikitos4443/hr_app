@@ -1,10 +1,22 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import Card from 'primevue/card'
+import { useRoute, useRouter } from 'vue-router'
 
 import { AuthTabs, LoginForm, RegisterForm, type AuthMode } from '@/features/auth'
 
-const mode = ref<AuthMode>('login')
+const route = useRoute()
+const router = useRouter()
+
+const mode = computed<AuthMode>({
+  get: () => (route.query.mode === 'register' ? 'register' : 'login'),
+  set: (value) => {
+    const query = { ...route.query }
+    if (value === 'register') query.mode = value
+    else delete query.mode
+    router.replace({ query })
+  },
+})
 
 const heading = computed(() => (mode.value === 'login' ? 'Welcome back' : 'Create an account'))
 const subheading = computed(() =>
