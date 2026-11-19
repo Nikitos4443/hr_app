@@ -1,18 +1,10 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-import { DEFAULT_AUTH_REDIRECT, useSessionStore } from '@/features/auth'
-
 const devRoutes: RouteRecordRaw[] = import.meta.env.DEV
   ? [{ path: '/dev/ui', name: 'dev-ui', component: () => import('@/pages/dev/UiKitPage.vue') }]
   : []
 
 export const routes: RouteRecordRaw[] = [
-  {
-    path: '/',
-    name: 'home',
-    redirect: () => (useSessionStore().isAuthenticated ? DEFAULT_AUTH_REDIRECT : '/auth'),
-  },
-
   {
     path: '/auth',
     component: () => import('@/layouts/AuthLayout.vue'),
@@ -65,6 +57,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('@/layouts/PublicLayout.vue'),
     children: [
+      { path: '', name: 'home', component: () => import('@/pages/public/LandingPage.vue') },
       {
         path: 'vacancies/:vacancyId(\\d+)',
         name: 'public-vacancy',
