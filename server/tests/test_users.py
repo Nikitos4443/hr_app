@@ -1,3 +1,4 @@
+import jwt
 from starlette import status
 
 from hr_core.sql.tables.users import Users
@@ -155,3 +156,17 @@ def test_hr_cannot_use_admin_endpoints(client, session_factory):
 
 def test_users_require_authentication(client):
     assert client.get("/users/").status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_admin_without_company_can_read_own_profile(client):
+    response = client.post(
+        "/auth/",
+        json={"username": "lonely", "password": "secret123", "confirm_password": "secret123"},
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    token = response.json()["access_token"]
+    uid = jwt.decode(token, options={"verify_signature": False})["id"]
+
+    response = client.get(f"/users/{uid}", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["company_id"] is None
