@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from dotenv import load_dotenv
 from guard import SecurityConfig
+from guard_core.handlers.suspatterns_handler import ALL_DETECTION_CATEGORIES
 
 from hr_core.config.parameters import load_parameters
 
@@ -16,7 +17,6 @@ def _require_env(name: str) -> str:
     return value
 
 
-SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL", "sqlite:///./hrapp.db")
 SECRET_KEY = _require_env("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "20"))
@@ -88,4 +88,7 @@ security_config = SecurityConfig(
     cors_allow_credentials=True,
     cors_expose_headers=["X-Custom-Header"],
     cors_max_age=600,
+    # The server never fetches user-supplied URLs, so SSRF scanning only
+    # produces false positives (e.g. Referer: http://localhost:5173/...).
+    enabled_detection_categories=ALL_DETECTION_CATEGORIES - {"ssrf"},
 )

@@ -15,7 +15,8 @@ const company = useCompanyQuery(companyId)
 
 const hasNoCompany = computed(() => me.isSuccess.value && me.data.value?.company_id == null)
 const isLoading = computed(
-  () => me.isPending.value || (!hasNoCompany.value && company.isPending.value),
+  // isLoading (not isPending): a disabled query stays "pending" forever, which hung the page.
+  () => me.isLoading.value || company.isLoading.value,
 )
 const error = computed(() => me.error.value ?? company.error.value)
 

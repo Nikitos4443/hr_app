@@ -1,4 +1,4 @@
-from config import DATABASE_PROVIDER, MONGO_DB_NAME, MONGO_URI, SQLALCHEMY_DATABASE_URL
+from config import DATABASE_PROVIDER, MONGO_DB_NAME, MONGO_URI, settings
 
 SessionLocal = None
 mongo_db = None
@@ -10,10 +10,10 @@ def init_db():
     if DATABASE_PROVIDER == "sql":
         from hr_core.sql.session import create_all_tables, create_session_factory
 
-        SessionLocal = create_session_factory(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
+        SessionLocal = create_session_factory(settings.database_url, pool_pre_ping=True)
         # Postgres (Neon) schema is managed by Alembic (shared/migrations), never at startup.
         # Local SQLite is a throwaway dev DB, so just create the tables there.
-        if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+        if settings.database_url.startswith("sqlite"):
             create_all_tables(SessionLocal)
 
     elif DATABASE_PROVIDER == "mongo":

@@ -20,4 +20,4 @@ COPY server/ .
 ENV PORT=8000
 EXPOSE ${PORT}
 
-CMD ["fastapi", "run", "app.py", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["fastapi", "run", "--entrypoint", "app:app", "--host", "0.0.0.0", "--port", "8000"]
