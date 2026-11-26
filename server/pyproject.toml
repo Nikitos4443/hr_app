@@ -42,3 +42,7 @@ pythonpath = ["."]
 
 [tool.uv.sources]
 hr-core = { workspace = true }
+
+[tool.fastapi]
+# The socket.io wrapper, not the bare FastAPI app, or /socket.io WebSockets get 403.
+entrypoint = "app:app"

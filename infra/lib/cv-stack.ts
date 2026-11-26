@@ -48,14 +48,21 @@ export class CVPipelineStack extends cdk.Stack {
       parameterName: 'FRONTEND_URL',
     })
 
+    const deadLetterQueue = new sqs.Queue(this, 'CVPipelineDLQ', {
+      retentionPeriod: Duration.days(14),
+    });
+
     const queue = new sqs.Queue(this, 'CVPipelineQueue', {
       visibilityTimeout: Duration.seconds(lambdaTimeout.toSeconds() * 2),
+      deadLetterQueue: { queue: deadLetterQueue, maxReceiveCount: 3 },
     });
 
     const fn = new lambda.Function(this, 'CVPipelineLambda', {
       runtime: lambda.Runtime.PYTHON_3_14,
       handler: 'app.index',
       timeout: lambdaTimeout,
+      // The default 128 MB runs out of memory while importing LangChain/Gemini and parsing the PDF.
+      memorySize: 1024,
       code: pythonLambdaCode('resume_process_lambda', 'resume-process-lambda'),
       environment: { BUCKET_NAME: bucketName },
     });

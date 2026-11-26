@@ -115,6 +115,9 @@ class UserService(IUserService):
         self, actor: AuthPrincipal, user_id: int, admin_only: bool = False
     ) -> tuple[User, User]:
         current = self._require_admin(actor) if admin_only else self._load_actor(actor)
+        # Self-access must work even before an admin has created a company.
+        if not admin_only and current.id == user_id:
+            return current, current
         if current.role == UserRole.COMPANY_ADMIN:
             target = self.repo.get_by_id(user_id) if current.company_id is not None else None
             if target is None or target.company_id != current.company_id:
