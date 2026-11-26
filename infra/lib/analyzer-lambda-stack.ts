@@ -22,6 +22,8 @@ export class AnalyzerLambdaStack extends cdk.Stack {
       runtime: lambda.Runtime.PYTHON_3_14,
       handler: 'app.index',
       timeout: lambdaTimeout,
+      // The default 128 MB runs out of memory while importing LangChain/Gemini.
+      memorySize: 1024,
       code: pythonLambdaCode('analyzer_lambda', 'analyzer-lambda'),
     });
 

@@ -29,8 +29,13 @@ export class VideoPipelineStack extends cdk.Stack {
       parameterName: 'DATABASE_URL',
     });
 
+    const deadLetterQueue = new sqs.Queue(this, 'VideoPipelineDLQ', {
+      retentionPeriod: Duration.days(14),
+    });
+
     const queue = new sqs.Queue(this, 'VideoPipelineQueue', {
       visibilityTimeout: Duration.seconds(lambdaTimeout.toSeconds() * 2),
+      deadLetterQueue: { queue: deadLetterQueue, maxReceiveCount: 3 },
     });
 
     // Container image instead of a zip: faster-whisper + PyAV + the baked model are ~500 MB,
