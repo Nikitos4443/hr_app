@@ -11,7 +11,6 @@ import {
   ANALYZER_SCHEDULER_ROLE_NAME,
   CADDY_VERSION,
   MAIN_SERVER_APP_DIR,
-  MAIN_SERVER_ENV_PARAMETER,
   SSM_ANALYZER_LAMBDA_ARN,
   SSM_ANALYZER_SCHEDULER_ROLE_ARN,
 } from '../constants';
@@ -39,16 +38,6 @@ export class MainServerStack extends cdk.Stack {
     bucket.grantReadWrite(role);
 
     role.addToPolicy(new iam.PolicyStatement({
-      actions: ['ssm:GetParameter'],
-      resources: [
-        cdk.Stack.of(this).formatArn({
-          service: 'ssm',
-          resource: 'parameter',
-          resourceName: MAIN_SERVER_ENV_PARAMETER.replace(/^\//, ''),
-        }),
-      ],
-    }));
-    role.addToPolicy(new iam.PolicyStatement({
       actions: ['kms:Decrypt'],
       resources: ['*'],
       conditions: { StringEquals: { 'kms:ViaService': `ssm.${this.region}.amazonaws.com` } },
@@ -63,6 +52,7 @@ export class MainServerStack extends cdk.Stack {
     // Parameters the server loads on startup (PARAMETER_NAMES in server/config.py) when they are not
     // set in the environment. The two analyzer ARNs are published by AnalyzerLambdaStack (deploy it first).
     const serverParameterNames = [
+      'SECRET_KEY',
       'DATABASE_URL',
       'GOOGLE_API_KEY',
       'SMTP_USER',

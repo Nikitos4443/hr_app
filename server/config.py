@@ -10,25 +10,14 @@ from hr_core.config.parameters import load_parameters
 load_dotenv()
 
 
-def _require_env(name: str) -> str:
-    value = os.getenv(name)
-    if not value:
-        raise RuntimeError(f"Required environment variable {name} is not set")
-    return value
-
-
-SECRET_KEY = _require_env("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "20"))
 DATABASE_PROVIDER = os.getenv("DATABASE_PROVIDER", "sql")
 MONGO_URI = os.getenv("MONGO_URI", "sql")
 MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "sql")
-BUCKET_NAME = _require_env("BUCKET_NAME")
-
-LLM_MODEL = os.getenv("LLM")
-
 
 PARAMETER_NAMES = [
+    "SECRET_KEY",
     "DATABASE_URL",
     "GOOGLE_API_KEY",
     "SMTP_USER",
@@ -47,6 +36,7 @@ MAX_PAGES = 3
 
 @dataclass(frozen=True)
 class Settings:
+    secret_key: str
     database_url: str
     google_api_key: str
     gmail_user: str
@@ -61,6 +51,7 @@ class Settings:
 def _load_settings() -> Settings:
     values = load_parameters(PARAMETER_NAMES)
     return Settings(
+        secret_key=values["SECRET_KEY"],
         database_url=values["DATABASE_URL"],
         google_api_key=values["GOOGLE_API_KEY"],
         gmail_user=values["SMTP_USER"],
@@ -74,6 +65,8 @@ def _load_settings() -> Settings:
 
 
 settings = _load_settings()
+SECRET_KEY = settings.secret_key
+BUCKET_NAME = settings.bucket_name
 
 
 security_config = SecurityConfig(

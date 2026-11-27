@@ -6,7 +6,6 @@ set -euo pipefail
 RELEASE_DIR="$1"
 REGION="$2"
 BASE=/opt/hrapp
-ENV_PARAMETER=/hr-app/main-server/env
 
 # Backend sources (keep local state: .env, sqlite db, venv)
 rsync -a --delete \
@@ -15,11 +14,6 @@ rsync -a --delete \
 
 # Frontend build
 rsync -a --delete "$RELEASE_DIR/client/" "$BASE/client/"
-
-# Server env from SSM Parameter Store
-aws ssm get-parameter --region "$REGION" --name "$ENV_PARAMETER" --with-decryption \
-  --query Parameter.Value --output text > "$BASE/app/server/.env"
-chmod 600 "$BASE/app/server/.env"
 
 # Python deps (uv downloads the interpreter pinned in .python-version if needed)
 cd "$BASE/app"
