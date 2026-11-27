@@ -1,10 +1,12 @@
-import type { ScreeningQuestions } from '../types/screening'
+import type { ScreeningSession } from '../types/screening'
 
 export const isScreeningMockEnabled = () => import.meta.env.VITE_USE_MOCKS === 'true'
 
-export const screeningQuestionsFixture: ScreeningQuestions = {
+export const screeningSessionFixture: ScreeningSession = {
   vacancy_title: 'Senior Vue.js Developer',
   company_name: 'Lime Technologies',
+  status: 'screening',
+  screening_progress: 'in_progress',
   questions: [
     {
       id: 1,
@@ -33,8 +35,8 @@ export const screeningQuestionsFixture: ScreeningQuestions = {
   ],
 }
 
-export function mockScreeningQuestions(): Promise<ScreeningQuestions> {
+export function mockScreeningSession(): Promise<ScreeningSession> {
   return new Promise((resolve) => {
-    setTimeout(() => resolve(structuredClone(screeningQuestionsFixture)), 300)
+    setTimeout(() => resolve(structuredClone(screeningSessionFixture)), 300)
   })
 }

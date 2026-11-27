@@ -7,7 +7,9 @@ class Questions(Base):
     __tablename__ = "questions"
 
     id = Column(Integer, primary_key=True)
-    vacancy_id = Column(Integer, ForeignKey("vacancies.id"), nullable=False, index=True)
+    vacancy_id = Column(
+        Integer, ForeignKey("vacancies.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     order = Column(Integer, nullable=False)
     type = Column(String, nullable=False)  # video | text
     text = Column(Text, nullable=False)

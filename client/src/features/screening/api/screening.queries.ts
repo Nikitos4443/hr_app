@@ -3,14 +3,12 @@ import { useMutation, useQuery } from '@tanstack/vue-query'
 
 import { uploadToPresignedPost } from '@/shared/api'
 
-import type { ScreeningQuestions, ScreeningSession } from '../types/screening'
+import type { ScreeningSession } from '../types/screening'
 import { screeningApi } from './screening.api'
-import { screeningQuestionsApi } from './screening-questions.api'
 
 export const screeningKeys = {
   all: ['screening'] as const,
   session: (token: string) => [...screeningKeys.all, 'session', token] as const,
-  questions: (token: string) => [...screeningKeys.all, 'questions', token] as const,
 }
 
 export function useScreeningQuery(token: MaybeRefOrGetter<string | null | undefined>) {
@@ -19,16 +17,6 @@ export function useScreeningQuery(token: MaybeRefOrGetter<string | null | undefi
     queryFn: () => screeningApi.get(toValue(token)!),
     enabled: computed(() => !!toValue(token)),
     retry: false,
-  })
-}
-
-export function useScreeningQuestionsQuery(token: MaybeRefOrGetter<string | null | undefined>) {
-  return useQuery<ScreeningQuestions>({
-    queryKey: computed(() => screeningKeys.questions(toValue(token) ?? '')),
-    queryFn: () => screeningQuestionsApi.get(toValue(token)!),
-    enabled: computed(() => !!toValue(token)),
-    retry: false,
-    staleTime: Infinity,
   })
 }
 
@@ -50,7 +38,10 @@ export function useUploadVideoAnswerMutation(token: MaybeRefOrGetter<string>) {
   return useMutation({
     mutationFn: async ({ questionId, video, onProgress, signal }: UploadVideoInput) => {
       const post = await screeningApi.getVideoUploadUrl(toValue(token), questionId)
-      const fields = { ...post.fields, 'Content-Type': video.type || 'video/webm' }
+      // S3 checks POST-policy `starts-with` on Content-Type per comma-separated part, so a
+      // recorder type like "video/webm;codecs=vp8,opus" fails; send only the base MIME type.
+      const contentType = video.type.split(';')[0]?.trim() || 'video/webm'
+      const fields = { ...post.fields, 'Content-Type': contentType }
       await uploadToPresignedPost({ ...post, fields }, video, { onProgress, signal })
     },
   })

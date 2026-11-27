@@ -2,7 +2,6 @@ export * from './api/screening.queries'
 export type {
   EndState,
   ScreeningQuestion,
-  ScreeningQuestions,
   ScreeningQuestionType,
   ScreeningSession,
   TextAnswerResult,
