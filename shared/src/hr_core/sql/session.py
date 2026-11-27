@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session, sessionmaker
 
 
 def normalize_database_url(database_url: str) -> str:
-    """Neon/Heroku-style `postgres(ql)://` URLs -> SQLAlchemy psycopg3 driver."""
     for prefix in ("postgres://", "postgresql://"):
         if database_url.startswith(prefix):
             return "postgresql+psycopg://" + database_url.removeprefix(prefix)
@@ -14,7 +13,6 @@ def normalize_database_url(database_url: str) -> str:
 
 
 def create_session_factory(database_url: str, **engine_kwargs: Any) -> sessionmaker[Session]:
-    """Create engine + session factory once per process (server startup / lambda cold start)."""
     database_url = normalize_database_url(database_url)
     if make_url(database_url).get_backend_name() == "postgresql":
         # PgBouncer (Neon "-pooler" host) in transaction mode breaks psycopg's auto-prepared

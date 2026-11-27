@@ -38,6 +38,8 @@ class ScreeningService:
         except ScreeningError as e:
             raise HTTPException(status_code=e.status_code, detail=e.detail) from e
 
+        print("AFTER")
+
         vacancy = self.vacancies.get_by_id(application.vacancy_id)
         answered_ids = {
             v.question_id

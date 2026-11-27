@@ -1,8 +1,3 @@
-export interface ScreeningSession {
-  application_id: number
-  vacancy_id: number
-  status: string
-}
 
 export interface TextAnswerResult {
   question_id: number
@@ -20,9 +15,11 @@ export interface ScreeningQuestion {
   answered: boolean
 }
 
-export interface ScreeningQuestions {
+export interface ScreeningSession {
   vacancy_title: string
   company_name: string
+  status: string
+  screening_progress: 'in_progress' | 'completed'
   questions: ScreeningQuestion[]
 }
 
