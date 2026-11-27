@@ -5,6 +5,7 @@ After=network.target
 [Service]
 User=hrapp
 WorkingDirectory=/opt/hrapp/app/server
+EnvironmentFile=/etc/hrapp/env
 ExecStart=/opt/hrapp/app/.venv/bin/fastapi run app.py --host 127.0.0.1 --port 8000
 Restart=always
 RestartSec=3

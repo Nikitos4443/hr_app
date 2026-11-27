@@ -31,6 +31,10 @@ else
 fi
 echo "SITE_ADDRESS=$SITE_ADDRESS" > /etc/caddy/env
 
+# boto3 does not read the region from instance metadata, so hand it to the server explicitly
+mkdir -p /etc/hrapp
+printf 'AWS_REGION=%s\nAWS_DEFAULT_REGION=%s\n' "$REGION" "$REGION" > /etc/hrapp/env
+
 # Web server config and systemd units
 install -m 644 "$RELEASE_DIR/Caddyfile" /etc/caddy/Caddyfile
 install -m 644 "$RELEASE_DIR/caddy.service" "$RELEASE_DIR/hrapp.service" /etc/systemd/system/
